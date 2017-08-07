@@ -1,0 +1,52 @@
+@charset "UTF-8";
+
+/*==================================================================================
+ UI & design consuting - FOR C&C (주)에프오알씨앤씨 - UI Creative Team 
+www.forcnc.co.kr  / (02)322-0637
+==================================================================================*/
+/* 공통 */
+/*
+body{
+	font-size:12px !important;
+	line-height: 1.4em;
+	font-family:'Malgun Gothic', '맑은 고딕' , arial, dotum, gulim !important;
+	color:#000;
+	padding:0; margin:0 !important;
+}
+a {
+	font-family:'Malgun Gothic', arial, gulim, dotum;
+	color: #000;
+	text-decoration:none !important;
+	cursor:pointer;
+}
+a:focus {outline:none;}
+a:hover {text-decoration:none;}
+a img, fieldset {border:0;}
+button {
+	cursor:pointer;
+	font-family:'Malgun Gothic', arial, gulim, dotum;
+}
+*/
+/* 컨텐츠 */
+.date-sort-article{display:inline-block;float:right;position:relative;}
+.date-sort-content .sort-text{font-size:13px;font-weight:bold;color:#f04c2a;text-align:right;display:block;text-decoration:none;}
+.date-sort-content .sort-option{width:324px;background-color:#fff;box-shadow:0px 1px 2px #888888;padding:10px 14px;position:absolute;top:20px;right:6px;
+	right:0; z-index : 1; display:none;
+}
+.sort-option .title{font-size:11px;color:#f04c2a;margin-bottom:6px;}
+.sort-option .title2{font-size:11px;color:#828282;margin-bottom:6px;}
+.date-select{margin-bottom:14px;}
+.date-select button{width:56px;height:22px;color:#A5A5A5;border:1px solid #e0e0e0;border-radius:3px;background-color:#fff;cursor:pointer;}
+.date-select button.selected{color:#fff;border:1px solid #f04c2a;border-radius:3px;background-color:#f04c2a;}
+.data-insert{margin-bottom:8px;}
+.data-insert input{font-size:11px;height:24px;border:1px solid #d8d8d8;color:#bbbbbb;padding:0 5px;
+	margin-right:7px;
+}
+.data-insert span{margin:0 3px;vertical-align:-2px;color:#bbbbbb;}
+.sort-option .btn-search button{width:320px;height:25px;color:#fff;cursor:pointer;border:1px solid #f04c2a;background-color:#f04c2a;}
+.data-insert .ico-anchor .ico-date{display: inline-block;width:16px;height:15px;background-position:-50px top;vertical-align:middle;margin-top:3px;margin-left:3px;cursor:pointer;}
+.data-insert .ico-anchor .ico-img{text-indent:-10000px;overflow:hidden;
+	/* background-image:url(../images/date_sort_form.png); */
+}
+.date-sort-content .sort-btn{text-indent:10000px;overflow: hidden;background-image:url(../images/date_sort_form.png);}
+.date-sort-content .close{display:inline-block;width:13px;height:14px;background-position:-85px top;vertical-align:middle;margin-top: 3px;margin-left:3px;}

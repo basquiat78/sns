@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.LikeItMapper">
+
+	<resultMap id="likeItMemberResultMap" type="org.uengine.sns.member.vo.MemberVo">
+		<result property="memberId" 			column="MEMBER_ID"/>
+		<result property="memberName" 			column="MEMBER_NAME"/>
+		<result property="memberThumbUrl" 		column="MEMBER_THUMB_URL"/>
+		<result property="memberPositionName"	column="POSITION_NAME" />
+		<result property="memberPartName" 		column="DEPT_NAME" />
+	</resultMap>
+
+	<!-- 피드별 좋아요 멤버 LIST 조회 -->
+	<select id="selectLikeItMemberList" parameterType="map" resultMap="likeItMemberResultMap">
+		SELECT 
+			MB.MEMBER_NAME
+			,MB.MEMBER_THUMB_URL
+		 	,MB.MEMBER_ID
+		 	,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+			,
+			<choose>
+			<when test="lang == 'en'">U.DEPT_NAME_EN</when>
+			<otherwise>U.DEPT_NAME</otherwise>
+			</choose> AS DEPT_NAME
+		FROM ${defaultTablePrefix}LIKEIT TUL
+		   , ${defaultTablePrefix}MEMBER MB
+		   , ${defaultTablePrefix}USERINFO U
+	   WHERE TUL.REG_MEMBER_ID = MB.MEMBER_ID
+		 AND MB.SYNC_KEY = U.USER_ID
+		 AND TUL.FEED_ID = #{feedId}
+	</select>
+	
+	<!-- 이미 좋아요 등록이 되었는지 확인 -->
+	<select id="selectLikeIt" parameterType="org.uengine.sns.feed.vo.LikeItVo" resultType="int">
+		SELECT 
+		   	 COUNT(FEED_ID) AS LIKECNT
+			FROM ${defaultTablePrefix}LIKEIT 
+			WHERE FEED_ID = #{feedId}
+			  AND REG_MEMBER_ID = #{regMemberId}
+	</select>
+	
+	<!-- 좋아요 등록 -->
+	<insert id="insertLikeIt" parameterType="org.uengine.sns.feed.vo.LikeItVo" >
+		INSERT INTO ${defaultTablePrefix}LIKEIT 
+			(
+			 REG_MEMBER_ID, 
+			 FEED_ID, 
+			 REGDTTM
+			) VALUES 
+			(
+			 #{regMemberId}, 
+			 #{feedId}, 
+			 #{regDttm}
+			)
+	</insert>
+    
+	<!-- 피드의 좋아요 카운트 업데이트 -->
+	<update id="updateFeedLikeCnt" parameterType="org.uengine.sns.feed.vo.LikeItVo">
+		UPDATE ${defaultTablePrefix}FEED 
+		   SET LIKEIT_CNT = (
+		   					SELECT COUNT(FEED_ID) 
+								FROM ${defaultTablePrefix}LIKEIT 
+								WHERE FEED_ID=#{feedId}
+							) 
+		WHERE FEED_ID=#{feedId}
+	</update>
+	
+	<!-- 좋아요 삭제 -->
+	<delete id="deleteLikeIt" parameterType="org.uengine.sns.feed.vo.LikeItVo">
+		DELETE FROM ${defaultTablePrefix}LIKEIT 
+		WHERE REG_MEMBER_ID = #{regMemberId} 
+		  AND FEED_ID = #{feedId}
+	</delete>
+
+</mapper>

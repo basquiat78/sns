@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.noticeconfig.mapper.NoticeConfigMapper">
+	
+	<resultMap id="notiAllResultMap" type="org.uengine.sns.noticeconfig.vo.NoticeConfigVo">
+		<result property="memberId" 		column="MEMBER_ID"/>
+		<result property="memberName" 		column="MEMBER_NAME"/>
+		<result property="followerType" 	column="FOLLOWER_TYPE"/>
+		<result property="syncKey"    		column="SYNC_KEY"/>
+		<result property="isGroupAct" 		column="ISGROUPACT"/>
+		<result property="isGroupNewFeed" 	column="ISGROUPNEWFEED"/>
+		<result property="isFeedFollow" 	column="ISFEEDFOLLOW"/>
+		<result property="isFeedComment" 	column="ISFEEDCOMMENT"/>
+		<result property="isFeedLikeIt" 	column="ISFEEDLIKEIT"/>
+		<result property="isFeedFollowed"	column="ISFEEDFOLLOWED"/>
+		<result property="isToDoComing" 	column="ISTODOCOMING"/>
+		<result property="isApproval" 		column="ISAPPROVAL"/>
+		<result property="apiNoticeExcYn" 	column="API_NOTI_EXC_YN" />
+	</resultMap>
+	
+	<select id="selectNoticeConfigByMemberId" parameterType="long" resultMap="notiAllResultMap">
+		SELECT
+			 BBB.MEMBER_ID
+			 ,IFNULL(AAA.ISGROUPACT			, 1) 	ISGROUPACT
+			 ,IFNULL(AAA.ISGROUPNEWFEED		, 1) 	ISGROUPNEWFEED
+			 ,IFNULL(AAA.ISFEEDFOLLOW		, 1) 	ISFEEDFOLLOW
+			 ,IFNULL(AAA.ISFEEDCOMMENT		, 1) 	ISFEEDCOMMENT
+			 ,IFNULL(AAA.ISFEEDLIKEIT		, 1) 	ISFEEDLIKEIT
+			 ,IFNULL(AAA.ISFEEDFOLLOWED		, 1) 	ISFEEDFOLLOWED
+			 ,IFNULL(AAA.ISTODOCOMING		, 1) 	ISTODOCOMING
+			 ,IFNULL(AAA.ISAPPROVAL			, 0) 	ISAPPROVAL
+			 ,BBB.ISENTER
+			FROM ${defaultTablePrefix}NOTICONFIG AAA RIGHT JOIN ${defaultTablePrefix}MEMBER BBB 
+															 ON AAA.MEMBER_ID = BBB.MEMBER_ID
+			WHERE BBB.MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectNoticeConfigByFeedFollower" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="notiAllResultMap">
+		SELECT DISTINCT
+			MEMBERLIST.MEMBER_ID
+      		, TSM.MEMBER_NAME
+            , TSM.SYNC_KEY
+			,IFNULL(TSN.ISGROUPACT			, 1) 	ISGROUPACT
+			,IFNULL(TSN.ISGROUPNEWFEED		, 1) 	ISGROUPNEWFEED
+			,IFNULL(TSN.ISFEEDFOLLOW		, 1) 	ISFEEDFOLLOW
+			,IFNULL(TSN.ISFEEDCOMMENT		, 1) 	ISFEEDCOMMENT
+			,IFNULL(TSN.ISFEEDLIKEIT		, 1) 	ISFEEDLIKEIT
+			,IFNULL(TSN.ISFEEDFOLLOWED		, 1) 	ISFEEDFOLLOWED
+			,IFNULL(TSN.ISTODOCOMING		, 1) 	ISTODOCOMING
+			,IFNULL(TSN.ISAPPROVAL			, 0) 	ISAPPROVAL
+			<if test="actType == 'FEED_FOLLOWER_REG' ">
+						, CASE WHEN IFNULL(TSN.ISFEEDFOLLOW, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="actType == 'FEED_COMMENT_REG' ">
+						, CASE WHEN IFNULL(TSN.ISFEEDCOMMENT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="actType == 'OFW_LIKEIT_REG' ">
+						, CASE WHEN IFNULL(TSN.ISFEEDLIKEIT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="actType == 'FEED_FOLLOWER_REG' ">
+						, CASE WHEN IFNULL(TSN.ISFEEDFOLLOWED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="groupFeedYn != 'Y'.toString() and (actType == 'FEED_REG' or actType == 'POLL_REG' or  actType == 'TODO_REG' or actType == 'FEED_DEL' or actType == 'POLL_DEL' or  actType == 'TODO_DEL') ">
+						, CASE WHEN IFNULL(TSN.ISFEEDFOLLOWED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="actType == 'APPROVAL_REG' ">
+						, CASE WHEN IFNULL(TSN.ISAPPROVAL, 0) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+		FROM (
+		  SELECT FOLLOWER_ID   MEMBER_ID
+		  	,  'MEMBER' FOLLOWER_TYPE
+		  FROM 	${defaultTablePrefix}FOLLOWER
+		  WHERE ITEM_TYPE 		= 'FEED'
+		  AND 	ITEM_ID 		= #{itemId}
+		  AND 	FOLLOWER_TYPE 	= 'MEMBER'
+		  UNION ALL
+		  SELECT MEMBER_ID
+		    ,  'GROUP' FOLLOWER_TYPE
+		  FROM 	${defaultTablePrefix}GRPFWL GFL
+		  WHERE GFL.GROUP_ID IN (
+		    SELECT FOLLOWER_ID 
+		    FROM  ${defaultTablePrefix}FOLLOWER
+		    WHERE ITEM_TYPE 	= 'FEED'
+		    AND   ITEM_ID 		= #{itemId}
+		    AND   FOLLOWER_TYPE = 'GROUP'
+		  )
+		) MEMBERLIST 
+		  JOIN ${defaultTablePrefix}MEMBER TSM ON TSM.MEMBER_ID = MEMBERLIST.MEMBER_ID
+		  LEFT OUTER JOIN ${defaultTablePrefix}NOTICONFIG TSN ON TSN.MEMBER_ID = MEMBERLIST.MEMBER_ID
+	</select>
+	
+	<select id="selectNoticeConfigByGroupFollower" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="notiAllResultMap">
+		SELECT 
+			MEMBERLIST.MEMBER_ID
+      		, TSM.MEMBER_NAME
+            , TSM.SYNC_KEY
+			,IFNULL(TSN.ISGROUPACT			, 1) 	ISGROUPACT
+			,IFNULL(TSN.ISGROUPNEWFEED		, 1) 	ISGROUPNEWFEED
+			,IFNULL(TSN.ISFEEDFOLLOW		, 1) 	ISFEEDFOLLOW
+			,IFNULL(TSN.ISFEEDCOMMENT		, 1) 	ISFEEDCOMMENT
+			,IFNULL(TSN.ISFEEDLIKEIT		, 1) 	ISFEEDLIKEIT
+			,IFNULL(TSN.ISFEEDFOLLOWED		, 1) 	ISFEEDFOLLOWED
+			,IFNULL(TSN.ISTODOCOMING		, 1) 	ISTODOCOMING
+			,IFNULL(TSN.ISAPPROVAL			, 0) 	ISAPPROVAL
+			<if test="actType == 'GROUP_REG' or actType == 'GROUP_FOLLOWER_REG' or actType == 'GROUP_FOLLOWER_DEL' or actType == 'GROUP_FOLLOWER_FORCEDEL' ">
+						, CASE WHEN IFNULL(TSN.ISGROUPACT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>
+			<if test="groupFeedYn == 'Y'.toString() and (actType == 'FEED_REG' or  actType == 'TODO_REG' or actType == 'POLL_REG' or  actType == 'FEED_DEL' or  actType == 'TODO_DEL' or actType == 'POLL_DEL') ">
+						, CASE WHEN IFNULL(TSN.ISGROUPNEWFEED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+			</if>			
+		FROM (
+		  SELECT MEMBER_ID
+		  FROM ${defaultTablePrefix}GRPFWL GFL
+		  WHERE GFL.GROUP_ID = #{itemId} 
+		) MEMBERLIST 
+		  JOIN ${defaultTablePrefix}MEMBER TSM ON TSM.MEMBER_ID = MEMBERLIST.MEMBER_ID
+		  LEFT OUTER JOIN ${defaultTablePrefix}NOTICONFIG TSN ON TSN.MEMBER_ID = MEMBERLIST.MEMBER_ID
+	</select>
+	
+	<select id="selectNoticeConfigByMemberVo" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="notiAllResultMap">
+		SELECT
+		 DISTINCT TSM.MEMBER_ID
+		, TSM.MEMBER_NAME
+		, TSM.SYNC_KEY
+		,IFNULL(TSN.ISGROUPACT , 1) ISGROUPACT
+		,IFNULL(TSN.ISGROUPNEWFEED , 1) ISGROUPNEWFEED
+		,IFNULL(TSN.ISFEEDFOLLOW , 1) ISFEEDFOLLOW
+		,IFNULL(TSN.ISFEEDCOMMENT , 1) ISFEEDCOMMENT
+		,IFNULL(TSN.ISFEEDLIKEIT , 1) ISFEEDLIKEIT
+		,IFNULL(TSN.ISFEEDFOLLOWED , 1) ISFEEDFOLLOWED
+		,IFNULL(TSN.ISTODOCOMING , 1) ISTODOCOMING
+		,IFNULL(TSN.ISAPPROVAL , 0) ISAPPROVAL
+		<if test="actType == 'FEED_FOLLOWER_REG' ">
+					, CASE WHEN IFNULL(TSN.ISFEEDFOLLOW, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="actType == 'FEED_COMMENT_REG' ">
+					, CASE WHEN IFNULL(TSN.ISFEEDCOMMENT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="actType == 'OFW_LIKEIT_REG' ">
+					, CASE WHEN IFNULL(TSN.ISFEEDLIKEIT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="actType == 'FEED_FOLLOWER_REG' ">
+					, CASE WHEN IFNULL(TSN.ISFEEDFOLLOWED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>	
+		<if test="actType == 'GROUP_REG' or actType == 'GROUP_FOLLOWER_REG' or actType == 'GROUP_FOLLOWER_DEL' or actType == 'GROUP_FOLLOWER_FORCEDEL' ">
+					, CASE WHEN IFNULL(TSN.ISGROUPACT, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="groupFeedYn == 'Y'.toString() and (actType == 'FEED_REG' or  actType == 'TODO_REG' or actType == 'POLL_REG' or actType == 'POLL_DEL' or  actType == 'FEED_DEL' or  actType == 'TODO_DEL') ">
+					, CASE WHEN IFNULL(TSN.ISGROUPNEWFEED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="groupFeedYn != 'Y'.toString() and (actType == 'FEED_REG' or actType == 'POLL_REG' or  actType == 'TODO_REG' or actType == 'FEED_DEL' or actType == 'POLL_DEL' or  actType == 'TODO_DEL') ">
+					, CASE WHEN IFNULL(TSN.ISFEEDFOLLOWED, 1) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		<if test="actType == 'APPROVAL_REG' ">
+					, CASE WHEN IFNULL(TSN.ISAPPROVAL, 0) = 1  THEN 'Y'	ELSE 'N' END API_NOTI_EXC_YN
+		</if>
+		FROM ${defaultTablePrefix}NOTICONFIG TSN
+		RIGHT JOIN ${defaultTablePrefix}MEMBER TSM
+		ON TSM.MEMBER_ID = TSN.MEMBER_ID
+		WHERE TSM.MEMBER_ID IN (
+        <if test="notiMemId > -999 ">
+              #{noticeMemberId} 
+        </if>
+		<if test="noticeMemberList != null and noticeMemberList.size() > 0">
+		    <foreach item="list" index="index" collection="noticeMemberList" separator="," > 
+		            <if test="list.followerId > 0 ">
+		                  #{list.followerId} 
+		            </if>
+		    </foreach>
+		</if>
+		)
+	</select>
+    
+    <insert id="insertNoticeConfig" parameterType="org.uengine.sns.noticeconfig.vo.NoticeConfigVo">
+		INSERT
+		 INTO ${defaultTablePrefix}NOTICONFIG 
+		 	( 
+			 MEMBER_ID
+			 <if test="isGroupAct >= 0 ">
+			 , ISGROUPACT
+			 </if>
+			 <if test="isGroupNewFeed >= 0 ">
+			 , ISGROUPNEWFEED
+			 </if>
+			 <if test="isFeedFollow >= 0 ">
+			 , ISFEEDFOLLOW
+			 </if>
+			 <if test="isFeedComment >= 0 ">
+			 , ISFEEDCOMMENT
+			 </if>
+			 <if test="isFeedLikeIt >= 0 ">
+			 , ISFEEDLIKEIT
+			 </if>
+			 <if test="isFeedFollowed >= 0 ">
+			 , ISFEEDFOLLOWED
+			 </if>
+			 <if test="isToDoComing >= 0 ">
+			 , ISTODOCOMING
+			 </if>
+			 <if test="isApproval >= 0 ">
+			 , ISAPPROVAL
+			 </if>
+		 	)
+		 VALUES 
+		 	( 
+		 	 #{memberId}
+			 <if test="isGroupAct >= 0 ">
+			 , #{isGroupAct}
+			 </if>
+			 <if test="isGroupNewFeed >= 0 ">
+			 , #{isGroupNewFeed}
+			 </if>
+			 <if test="isFeedFollow >= 0 ">
+			 , #{isFeedFollow}
+			 </if>
+			 <if test="isFeedComment >= 0 ">
+			 , #{isFeedComment}
+			 </if>
+			 <if test="isFeedLikeIt>= 0 ">
+			 , #{isFeedLikeIt}
+			 </if>
+			 <if test="isFeedFollowed >= 0 ">
+			 , #{isFeedFollowed}
+			 </if>
+			 <if test="isToDoComing >= 0 ">
+			 , #{isTodoComing}
+			 </if>
+			 <if test="isApproval >= 0 ">
+			 , #{isApproval}
+			 </if>
+		  	)
+	</insert>
+
+	<delete id="deleteNoticeConfig" parameterType="org.uengine.sns.noticeconfig.vo.NoticeConfigVo">
+		DELETE FROM ${defaultTablePrefix}NOTICONFIG
+		WHERE MEMBER_ID = #{memberId}
+	</delete>
+    
+</mapper>

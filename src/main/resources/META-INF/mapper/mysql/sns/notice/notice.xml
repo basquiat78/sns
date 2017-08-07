@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.notice.mapper.NoticeMapper">
+	
+	<!-- Notice resultMap -->
+	<resultMap id="noticeListResultMap" type="org.uengine.sns.notice.vo.NoticeVo">
+		<id property="noticeId" 		 	column="NOTI_ID"/>
+		<result property="itemType" 		column="ITEM_TYPE"/>
+		<result property="itemId" 			column="ITEM_ID"/>
+		<result property="noticeContent" 	column="NOTI_CONTENT"/>
+		<result property="noticeContentKo" 	column="NOTI_CONTENT_KO"/>
+		<result property="noticeContentEn" 	column="NOTI_CONTENT_EN"/>
+		<result property="noticeContentZh"	column="NOTI_CONTENT_ZH"/>
+		<result property="actType" 			column="ACT_TYPE"/>
+		<result property="regDttm" 			column="REGDTTM"/>
+		<result property="isRead" 			column="ISREAD"/>
+		<result property="toMemberId" 		column="TO_MEMBER_ID"/>
+		<result property="fromMemberId" 	column="FROM_MEMBER_ID"/>
+	</resultMap>
+	
+	<!-- Recent Act resultMap -->
+	<resultMap id="recentActResultMap" type="org.uengine.sns.notice.vo.NoticeVo">
+		<result property="noticeId"			column="NOTI_ID" />
+		<result property="noticeContent"  	column="NOTI_CONTENT" />
+		<result property="itemType"  	    column="ITEM_TYPE"/>
+		<result property="itemId"  	  	  	column="ITEM_ID"/>
+		<result property="itemTitle" 	  	column="ITEM_TITLE"/>
+		<result property="followerId"  	  	column="FOLLOWER_ID"/>
+		<result property="followerType" 	column="FOLLOWER_TYPE"/>
+		<result property="actType" 	      	column="ACT_TYPE"/>
+		<result property="regDttm" 	      	column="REGDTTM"/>
+		<result property="fromMemberId" 	column="FROM_MEMBER_ID"/>
+		<result property="fromMemberName"   column="FROM_MEMBER_NAME"/>
+		<result property="toMemberId" 	  	column="TO_MEMBER_ID"/>
+		<result property="toMemberName" 	column="TO_MEMBER_NAME"/>
+		<result property="noticeContentKo" 	column="NOTI_CONTENT_KO"/>
+		<result property="noticeContentEn" 	column="NOTI_CONTENT_EN"/>
+		<result property="noticeContentZh"	column="NOTI_CONTENT_ZH"/>
+		<result property="syncKey"	  	  	column="SYNC_KEY" />
+		<result property="totalNoticeCnt"	column="TOTAL_NOTI_CNT" />
+	</resultMap>
+	
+	<resultMap id="notiCntResultMap" type="org.uengine.sns.notice.vo.NoticeVo">
+		<result property="noticeCnt" column="NOTI_SCNT"/>
+	</resultMap>
+	
+	<!-- GNB 용 NOTICE 조회 -->
+	<select id="selectRecentActListBySynckey" parameterType="String" resultMap="recentActResultMap">
+		SELECT 
+			 TSN.NOTI_ID,
+			 TSN.ITEM_TYPE,
+			 TSN.ITEM_ID,
+			 TSN.ACT_TYPE,
+			 TSN.REGDTTM,
+			 TSN.ISREAD,
+			 TSN.FROM_MEMBER_ID,
+			 TSN.NOTI_ID,
+			 TSN.NOTI_CONTENT,
+			 TSN.NOTI_CONTENT_KO,
+			 TSN.NOTI_CONTENT_EN,
+			 TSN.NOTI_CONTENT_ZH,
+			 TSN.TO_MEMBER_ID,
+			 TOTSM.MEMBER_NAME TO_MEMBER_NAME,
+			 FROMTSM.MEMBER_NAME FROM_MEMBER_NAME,
+			 FROMTSM.SYNC_KEY
+			FROM ${defaultTablePrefix}NOTI TSN
+			   , ${defaultTablePrefix}MEMBER TOTSM
+			   , ${defaultTablePrefix}MEMBER FROMTSM
+			WHERE TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+			  AND TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+			  AND TSN.TO_MEMBER_ID = (SELECT MEMBER_ID FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY= #{userId} LIMIT 1)
+			  AND <![CDATA[ TSN.TO_MEMBER_ID <> TSN.FROM_MEMBER_ID ]]>
+			ORDER BY NOTI_ID DESC
+			LIMIT 10
+	</select>
+	
+	<!-- widget용 Notice 조회 -->
+	<select id="selectWidgetNoticeList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="noticeListResultMap">
+		SELECT 
+			 TSN.NOTI_ID,
+			 TSN.ITEM_TYPE,
+			 TSN.ITEM_ID,
+			 TSN.ACT_TYPE,
+			 TSN.REGDTTM,
+			 TSN.ISREAD,
+			 TSN.FROM_MEMBER_ID,
+			 TSN.NOTI_ID,
+			 TSN.NOTI_CONTENT,
+			 TSN.NOTI_CONTENT_KO,
+			 TSN.NOTI_CONTENT_EN,
+			 TSN.NOTI_CONTENT_ZH,
+			 TSN.TO_MEMBER_ID
+			FROM ${defaultTablePrefix}NOTI TSN
+			WHERE TSN.TO_MEMBER_ID = #{memberId}
+			ORDER BY NOTI_ID DESC
+			LIMIT 5
+	</select>
+	
+	<!-- 등록일 기준의 Notice Member 조회 -->
+	<select id="selectNoticeMembersByDate" parameterType="String" resultType="long">
+		SELECT 
+			 distinct TO_MEMBER_ID <!-- , COUNT(*) -->
+			FROM ${defaultTablePrefix}NOTI
+			WHERE ISREAD = 0
+			  AND <![CDATA[ REGDTTM >= STR_TO_DATE(#{value},'%Y%m%d%H%i%s') ]]>
+	</select>
+	
+	<!-- 등록일 기준의 Notice User 조회 -->
+	<select id="selectNoticeUsersByDate" parameterType="String" resultType="String">
+		SELECT 
+			 distinct TSM.SYNC_KEY 
+			FROM ${defaultTablePrefix}NOTI TSN, ${defaultTablePrefix}MEMBER TSM
+			WHERE TSN.ISREAD = 0
+			  AND TSN.TO_MEMBER_ID = TSM.MEMBER_ID
+			  AND TSM.ISDELETED = 0
+			  AND <![CDATA[ TSN.REGDTTM >= STR_TO_DATE(#{value},'%Y%m%d%H%i%s') ]]>
+	</select>
+	
+	<!-- 전체 Notice 조회 -->
+	<select id="selectNoticeList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="noticeListResultMap">
+		SELECT 
+			 NOTI_ID,           <!-- 알림 아이디 -->
+			 ITEM_TYPE,         <!-- 아이템 종류 (피드) -->
+			 ITEM_ID,           <!-- 아이템(그룹, 피드) ID -->
+			 NOTI_CONTENT,		<!-- 알림 내용 -->
+			 NOTI_CONTENT_KO,
+			 NOTI_CONTENT_EN,
+			 NOTI_CONTENT_ZH,
+			 ACT_TYPE,          <!-- CRUD, 태그, 좋아요, 댓글, 태그 등 -->
+			 REGDTTM,           <!-- 등록일시 -->
+			 ISREAD,            <!-- 읽음 여부 -->
+			 TO_MEMBER_ID,      <!-- 알림 수신 사용자 -->
+			 FROM_MEMBER_ID     <!-- 알림 발생 사용자 -->       
+			FROM ${defaultTablePrefix}NOTI 
+			ORDER BY NOTI_ID	
+	</select>
+
+	<!-- 멤버의 Notice 조회 -->
+	<select id="selectNoticeById" parameterType="long" resultMap="noticeListResultMap">
+		SELECT 
+			 NOTI_ID,           <!-- 알림 아이디 -->
+			 ITEM_TYPE,         <!-- 아이템 종류 (피드) -->
+			 ITEM_ID,           <!-- 아이템(그룹, 주제, 피드) ID -->
+			 NOTI_CONTENT,		<!-- 알림 내용-->
+			 NOTI_CONTENT_KO,
+			 NOTI_CONTENT_EN,
+			 NOTI_CONTENT_ZH,
+			 ACT_TYPE,          <!-- CRUD, 태그, 좋아요, 댓글, 태그 등 -->
+			 REGDTTM,           <!-- 등록일시 -->
+			 ISREAD,            <!-- 읽음 여부 -->
+			 TO_MEMBER_ID,      <!-- 알림 수신 사용자 -->
+			 FROM_MEMBER_ID     <!-- 알림 발생 사용자 -->         
+			FROM  ${defaultTablePrefix}NOTI
+			WHERE TO_MEMBER_ID = #{memberId}
+			ORDER BY NOTI_ID	
+	</select>
+	
+	<!-- Notice 조회 아이템 타임이 피드인 경우와 from_member_Id가 자신이 아닌경우와 to_member_id가 자신인 경우 그리고 화면에서 넘어온 등록된 시간보다 이후 등록된 피드만 가져온다.-->
+	<select id="selectNoticeByRegDttm" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="noticeListResultMap">
+		SELECT 
+			 NOTI_ID,           <!-- 알림 아이디 -->
+			 ITEM_TYPE,         <!-- 아이템 종류 (피드) -->
+			 ITEM_ID,           <!-- 아이템(그룹, 주제, 피드) ID -->
+			 NOTI_CONTENT,		<!-- 알림 내용-->
+			 NOTI_CONTENT_KO,
+			 NOTI_CONTENT_EN,
+			 NOTI_CONTENT_ZH,
+			 ACT_TYPE,          <!-- CRUD, 태그, 좋아요, 댓글, 태그 등 -->
+			 REGDTTM,           <!-- 등록일시 -->
+			 ISREAD,            <!-- 읽음 여부 -->
+			 TO_MEMBER_ID,      <!-- 알림 수신 사용자 -->
+			 FROM_MEMBER_ID     <!-- 알림 발생 사용자 -->         
+			FROM  ${defaultTablePrefix}NOTI
+			WHERE TO_MEMBER_ID = #{toMemberId}
+			  AND FROM_MEMBER_ID != #{fromMemberId}
+			  AND ACT_TYPE IN ('FEED_COMMENT_REG', 'FEED_REG')
+			  AND <![CDATA[  REGDTTM > #{regDttm} ]]>
+			ORDER BY NOTI_ID DESC	
+	</select>
+	
+	<!-- 멤버의 Notice 조회 -->
+	<select id="selectNoticeBySynckey" parameterType="String" resultMap="noticeListResultMap">
+		SELECT 
+			 NOTI_ID,           <!-- 알림 아이디 -->
+			 ITEM_TYPE,         <!-- 아이템 종류 (피드) -->
+			 ITEM_ID,           <!-- 아이템(그룹, 주제, 피드) ID -->
+			 NOTI_CONTENT,		<!-- 알림 내용-->
+			 NOTI_CONTENT_KO,
+			 NOTI_CONTENT_EN,
+			 NOTI_CONTENT_ZH,
+			 ACT_TYPE,          <!-- CRUD, 태그, 좋아요, 댓글, 태그 등 -->
+			 REGDTTM,           <!-- 등록일시 -->
+			 ISREAD,            <!-- 읽음 여부 -->
+			 TO_MEMBER_ID,      <!-- 알림 수신 사용자 -->
+			 FROM_MEMBER_ID     <!-- 알림 발생 사용자 -->         
+			FROM  ${defaultTablePrefix}NOTI
+			WHERE TO_MEMBER_ID = #{userId}
+			ORDER BY NOTI_ID	
+	</select>
+	
+	<select id="selectNoticeCntById" parameterType="long" resultMap="notiCntResultMap">
+		SELECT 
+			 COUNT(NOTI_ID) NOTI_SCNT   
+			FROM  ${defaultTablePrefix}NOTI
+			WHERE TO_MEMBER_ID = #{memberId}
+			  AND ISREAD = 0
+	</select>
+	
+	<select id="selectNoticeCntByUserId" parameterType="String" resultMap="notiCntResultMap">
+		SELECT 
+			 COUNT(TSN.NOTI_ID) NOTI_SCNT   
+			FROM ${defaultTablePrefix}NOTI TSN, ${defaultTablePrefix}MEMBER TSM
+			WHERE TSN.ISREAD = 0
+			  AND TSN.TO_MEMBER_ID = TSM.MEMBER_ID
+			  AND TSM.ISDELETED = 0
+			  AND TSM.SYNC_KEY = #{userId}	
+	</select>
+
+	<!-- Notice 추가 -->	
+	<insert id="insertNotice" parameterType="org.uengine.sns.notice.vo.NoticeVo">
+		INSERT INTO	${defaultTablePrefix}NOTI 
+		(
+		 ITEM_TYPE,         <!-- 아이템 종류 (피드) -->
+		 ITEM_ID,           <!-- 아이템(그룹, 주제, 피드) ID -->
+		 NOTI_CONTENT,      <!-- 알림 내용-->
+		 NOTI_CONTENT_KO,
+		 NOTI_CONTENT_EN,
+		 NOTI_CONTENT_ZH,
+		 ACT_TYPE,          <!-- CRUD, 태그, 좋아요, 댓글, 태그 등 -->
+		 REGDTTM,           <!-- 등록일시 -->
+		 ISREAD,            <!-- 읽음 여부 -->
+		 TO_MEMBER_ID,      <!-- 알림 수신 사용자 -->
+		 FROM_MEMBER_ID,    <!-- 알림 발생 사용자 -->
+		 FOLLOWER_TYPE,
+		 FOLLOWER_ID      
+		) 
+		VALUES
+		( 
+		 #{itemType},
+		 #{itemId},
+		 #{noticeContent},
+		 #{noticeContentKo},
+		 #{noticeContentEn},
+		 #{noticeContentZh},
+		 #{actType},
+		 #{regDttm},
+		 #{isRead},
+		 #{toMemberId},
+		 #{fromMemberId},
+		 #{followerType,	jdbcType=VARCHAR},
+		 #{followerId, 		jdbcType=INTEGER}
+		)
+		<selectKey keyProperty="noticeId" resultType="long" order="AFTER">
+			SELECT last_insert_id()
+		</selectKey>
+	</insert>
+    
+    <!-- Notice 갱신 -->
+	<update id="updateNotice" parameterType="org.uengine.sns.notice.vo.NoticeVo">
+    	UPDATE ${defaultTablePrefix}NOTI 
+    	   SET NOTI_ID = #{noticeId}
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(itemType)">
+				,ITEM_TYPE= #{itemType}    		<!-- 아이템 타입 -->
+			</if>
+		    <if test="itemId > 0 ">  
+				,ITEM_ID= #{itemId}	    	 	<!-- 아이템 아이디 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(noticeContent)">             
+				,NOTI_CONTENT= #{noticeContent}	<!-- 알림 내용 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(actType)">       
+				,ACT_TYPE= #{actType}			<!-- 활동 타입	-->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isRead)">   
+				,ISREAD= #{isRead}   			<!-- 읽음 여부 -->
+			</if>
+			<if test="toMemberId > 0 ">
+				, TO_MEMBER_ID = #{toMemberId}		<!-- 알림 수신 사용자 -->
+			</if>
+			<if test="fromMemberId > 0 ">
+				, FROM_MEMBER_ID = #{fromMemberId}	<!-- 알림 발생 사용자 -->
+			</if>
+		WHERE NOTI_ID = #{noticeId}
+	</update>
+	
+    <!-- Notice 갱신 -->
+	<update id="updateNoticeRead" parameterType="org.uengine.sns.notice.vo.NoticeVo">
+    	UPDATE ${defaultTablePrefix}NOTI 
+		   SET ISREAD= #{isRead}
+    	 WHERE TO_MEMBER_ID = #{toMemberId}
+	</update>
+	
+	<!-- Notice 삭제 -->
+	<update id="deleteNotice" parameterType="long">
+	</update>
+    
+    <!-- Total noti list 조회 -->
+	<select id="selectTotalNoticeListBySynckey" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="recentActResultMap">
+		SELECT
+		 TAB.*
+		, ( SELECT COUNT(TSN.NOTI_ID) FROM ${defaultTablePrefix}NOTI TSN INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID INNER JOIN ${defaultTablePrefix}MEMBER TOTSM ON TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+			 WHERE 1 = 1
+			 <if test="noticeInSelfYn == 'Y'.toString() ">
+					AND <![CDATA[ TSN.TO_MEMBER_ID <> TSN.FROM_MEMBER_ID ]]> 
+			 </if>
+					
+					<if test="itemType == null">
+					AND TSN.TO_MEMBER_ID = (
+						SELECT
+						 MEMBER_ID
+						FROM ${defaultTablePrefix}MEMBER
+						WHERE SYNC_KEY = #{syncKey})
+					</if>
+					
+					AND TSN.ISDELETED = '0'
+					<if test="itemType != null">
+						AND TSN.ITEM_TYPE = #{itemType}
+	                    AND TSN.ITEM_ID = #{itemId}
+	                    AND TSN.FOLLOWER_TYPE = #{itemType}
+			  			AND TSN.FOLLOWER_ID = #{itemId, jdbcType=BIGINT}
+					</if>
+		  ) TOTAL_NOTI_CNT
+		FROM (
+			SELECT
+			 TSN.ITEM_TYPE
+			, TSN.ITEM_ID
+			, TSN.ITEM_TITLE
+			, TSN.FOLLOWER_ID
+			, TSN.FOLLOWER_TYPE
+			, TSN.ACT_TYPE
+			, TSN.REGDTTM
+			, TSN.FROM_MEMBER_ID
+			, TSN.NOTI_ID
+			, TSN.NOTI_CONTENT
+			, TSN.NOTI_CONTENT_KO
+			, TSN.NOTI_CONTENT_EN
+			, TSN.NOTI_CONTENT_ZH
+			, FROMTSM.MEMBER_NAME FROM_MEMBER_NAME
+			, TSN.TO_MEMBER_ID
+			, TOTSM.MEMBER_NAME TO_MEMBER_NAME
+			, FROMTSM.SYNC_KEY
+			FROM ${defaultTablePrefix}NOTI TSN
+			INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM
+			ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+			INNER JOIN ${defaultTablePrefix}MEMBER TOTSM
+			ON TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+			WHERE 1 = 1
+		<if test="noticeInSelfYn == 'Y'.toString() ">
+			AND <![CDATA[ TSN.TO_MEMBER_ID <> TSN.FROM_MEMBER_ID ]]> 
+		</if>
+			
+			<if test="itemType == null">
+			AND TSN.TO_MEMBER_ID = (
+				SELECT
+				 MEMBER_ID
+				FROM ${defaultTablePrefix}MEMBER
+				WHERE SYNC_KEY = #{syncKey})
+			</if>
+				
+				AND TSN.ISDELETED = '0'
+				<if test="itemType != null">
+					AND TSN.ITEM_TYPE = #{itemType}
+                    AND TSN.ITEM_ID = #{itemId}
+                    AND TSN.FOLLOWER_TYPE = #{itemType}
+			  		AND TSN.FOLLOWER_ID = #{itemId, jdbcType=BIGINT}
+				</if>
+				
+		<if test="noticeId > 0 ">  				
+			AND <![CDATA[ TSN.NOTI_ID < #{noticeId} ]]>
+		</if>
+			ORDER BY NOTI_ID DESC
+			LIMIT 40 
+		 ) TAB
+
+	</select>
+	
+	<!-- 등록일 기준의 Notice User 조회 -->
+	<select id="selectNoticeUserByDateCount" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultType="int">
+		SELECT
+			 COUNT(TSM.SYNC_KEY) CNT
+			FROM ${defaultTablePrefix}NOTI TSN,
+				 ${defaultTablePrefix}MEMBER TSM
+			WHERE TSN.ISREAD = 0
+			  AND TSN.TO_MEMBER_ID = TSM.MEMBER_ID
+			  AND TSM.ISDELETED = 0
+			  AND TSM.SYNC_KEY = #{syncKey}
+			  AND <![CDATA[ TSN.REGDTTM >= STR_TO_DATE(#{noticeDateStr},'%Y%m%d%H%i%s') ]]>
+	</select>
+    
+</mapper>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.interfacegroup.mapper.InterfaceGroupMapper">
+	
+	<!-- Interface 그룹 관련 resultMap -->
+	<resultMap id="interfaceGroupList"	type="org.uengine.sns.interfacegroup.vo.InterfaceGroupVo">
+		<result property="contentsId" 	 column="CONTENTS_ID"/>
+		<result property="contentsType"  column="CONTENTS_TYPE"/>
+		<result property="contentsName"  column="CONTENTS_NAME"/>
+		<result property="regUserId"     column="REG_USER_ID"/>
+		<result property="snsGroupId"    column="SNS_GROUP_ID"/>
+	</resultMap>
+
+	<resultMap id="interfaceGroupFollowerList"	type="org.uengine.sns.interfacegroup.vo.InterfaceGroupFollowerVo">
+		<result property="userId"  column="USER_ID"/>
+	</resultMap>
+	
+	<!-- 임직원 그룹 리스트 -->
+	<select id="selectEmployeeGroupList" parameterType="string" resultMap="interfaceGroupList">
+		SELECT 
+			 CONT.CONTENTS_ID,
+	    	 CONT.CONTENTS_NAME,
+	    	 CONT.REG_USER_ID,
+	    	 CONT.SNS_GROUP_ID
+			FROM TB_EMP_CONTENTS CONT,
+				 TB_EMP_CONTENTS_CATEGORY CATE
+			WHERE CONT.CATEGORY_ID = CATE.CATEGORY_ID
+			  AND CATE.COMPANY_ID = #{companyId}
+			  AND CATE.DELETE_YN = 0
+			  AND CONT.TEMP_YN = '0'
+			  AND CONT.DELETE_YN = '0'
+	</select>
+	
+	<!-- 임직원 그룹의 멤버 리스트 -->
+	<select id="selectEmployeeGroupFollowerList" parameterType="long" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			 DISTINCT MNG_USER_ID AS USER_ID
+			FROM TB_EMP_CONTENTS_MANAGER
+			WHERE CONTENTS_ID = #{contentsId}
+	</select>
+	
+	<!-- 임직원 그룹의 sns_group_id 정보 상신 -->
+	<update id="updateEmployeeGroup" parameterType="org.uengine.sns.interfacegroup.vo.InterfaceGroupVo">
+		UPDATE TB_EMP_CONTENTS
+		   SET SNS_GROUP_ID = #{snsGroupId}
+		WHERE CONTENTS_ID  = #{contentsId}
+	</update>
+	
+	<!-- 전문가 그룹 리스트 -->
+	<select id="selectExpertGroupList" resultMap="interfaceGroupList">
+		SELECT 
+			 CD.CODE AS CONTENTS_ID
+			 CD.CODETYPE AS CONTENTS_TYPE
+			 CD.CODENAME_KO AS CONTENTS_NAME
+			 'sncadmin' AS REG_USER_ID
+			 CD.GROUP_ID AS SNS_GROUP_ID
+			FROM GROUPWARE.CODE CD
+			WHERE CD.CODETYPE IN (3, 6, 9, 15, 19, 21)
+	</select>
+	
+	<!-- 전문가/직무별 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype3" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			 DISTINCT JOB.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+		    	 GROUPWARE.JOB JOB
+		 	WHERE CD.CODETYPE = 3
+		   	  AND CD.CODE = JOB.JOBCODE
+	</select>
+	
+	<!-- 전문가/업무스킬별 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype6" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			 DISTINCT SK.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+		    	 GROUPWARE.SKILL SK
+			WHERE CD.CODETYPE = 6
+			  AND CD.CODE = SK.SKILLTYPE3CODE
+	</select>
+	
+	<!-- 전문가/프로젝트유형별 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype9" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			 DISTINCT PRJ.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+				 GROUPWARE.PROJECT PRJ
+			WHERE CD.CODETYPE = 9
+			  AND CD.CODE = PRJ.BIZDIVISIONCODE
+	</select>
+	
+	<!-- 전문가/주제별 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype15" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			 DISTINCT CL.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+				 GROUPWARE.LANG CL
+			WHERE CD.CODETYPE = 15
+			  AND CD.CODE = CL.LANGUAGETYPECODE
+	</select>
+	
+	<!-- 전문가/지역-해외 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype19" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			DISTINCT BT.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+				 GROUPWARE.TRIP BT
+			WHERE CD.CODETYPE = 19
+			  AND CD.CODENAME_KO = BT.COUNTRYCODE
+	</select>
+		
+	<!-- 전문가/지역-국내 그룹의 멤버 리스트 -->
+	<select id="selectExpertGroupFollowerListByCodetype21" resultMap="interfaceGroupFollowerList">
+		SELECT 
+			DISTINCT U.USERID AS USER_ID
+			FROM GROUPWARE.CODE CD,
+				 GROUPWARE.USER U
+			WHERE CD.CODETYPE = 21
+			  AND CD.CODENAME_KO = U.RESIDENTIALSTATE
+	</select>
+	
+	<!-- 전문가 그룹의 sns_group_id 정보 상신 -->
+	<update id="updateExpertGroup" parameterType="org.uengine.sns.interfacegroup.vo.InterfaceGroupVo">
+		UPDATE GROUPWARE.CODE
+		   SET GROUP_ID = #{snsGroupId}
+		WHERE CODE = #{contentsId}
+		  AND CODETYPE = #{contentsType}
+	</update>
+
+</mapper>

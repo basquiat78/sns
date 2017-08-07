@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.member.mapper.MemberMapper">
+	
+<!-- 멤버 resultMap -->
+	<resultMap id="memberListResultMap" type="org.uengine.sns.member.vo.MemberVo">
+		<id property="memberId" 				column="MEMBER_ID"/>
+		<result property="loginId" 				column="LOGIN_ID"/>
+		<result property="loginPassword" 		column="LOGIN_PASSWORD"/>   
+		<result property="encryptSalt" 			column="ENCRYPT_SALT"/>
+		<result property="memberName" 			column="MEMBER_NAME"/>
+		<result property="memberEname" 			column="MEMBER_ENAME"/>
+		<result property="authHost"   			column="AUTH_HOST"/>
+		<result property="tenantId"  	 		column="TENANT_ID"/>
+		<result property="isSysAdmin" 			column="ISSYSADMIN"/>
+		<result property="inviteAuthKey" 		column="INVITE_AUTH_KEY"/>
+		<result property="emailAddr" 			column="EMAIL_ADDR"/>
+		<result property="phone" 	 			column="PHONE"/>
+		<result property="handPhone" 			column="HANDPHONE"/>
+		<result property="isPublic" 			column="ISPUBLIC"/>
+		<result property="isEnter" 				column="ISENTER"/>
+		<result property="memberPicUrl" 		column="MEMBER_PIC_URL"/>
+		<result property="memberThumbUrl" 		column="MEMBER_THUMB_URL"/>
+		<result property="langSet" 	 			column="LANG_SET"/>
+		<result property="timeZone" 			column="TIMEZONE"/>
+		<result property="isDeleted" 			column="ISDELETED"/>
+		<result property="syncKey" 				column="SYNC_KEY"/>
+		<result property="lstSyncDttm" 			column="LST_SYNC_DTTM"/>
+		<result property="regDttm" 				column="REGDTTM"/>
+		<result property="companyId" 			column="COMPANY_ID"/>
+		<result property="companyName" 			column="COMPANY_NAME"/>
+		<result property="memberPartName"		column="PART_NAME" />
+		<result property="memberPositionName"	column="POSITION_NAME"/>
+		<collection property="bookmarkList"   		javaType="java.util.ArrayList" resultMap="bookmarkListResultMap"/>
+		<collection property="mobileList"  			javaType="java.util.ArrayList" resultMap="mobileInfoListResultMap"/>
+		<collection property="groupfwrList"  		javaType="java.util.ArrayList" resultMap="groupFollowerListResultMap"/>
+		<collection property="tenantMappingList"	javaType="java.util.ArrayList" resultMap="userTenantMappingListResultMap"/>
+	</resultMap>
+	
+	<!-- 멘션을 위한 정보 가져오기 -->
+	<resultMap id="mentionsListResultMap" type="org.uengine.sns.member.vo.MentionsVo">
+		<result property="id" 				column="MEMBER_ID"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="name" 			column="MEMBER_NAME"/>
+		<result property="avatar" 			column="MEMBER_PIC_URL"/>
+		<result property="email"   			column="EMAIL_ADDR"/>
+		<result property="jobPositionName"	column="JOB_POSITION_NAME"/>
+		<result property="deptFullPath"    	column="DEPT_FULL_PATH"/>
+		<result property="icon"   			column="ICON"/>
+		<result property="type"   			column="TYPE"/>
+	</resultMap>
+	
+	<!-- 모바일 정보 resultMap -->
+	<resultMap id="mobileInfoListResultMap" type="org.uengine.sns.member.vo.MobileInfoVo">
+		<id property="memberId" 		column="MEMBER_ID"/>
+		<result property="jId" 			column="JID"/>
+		<result property="pnsToken" 	column="PNS_TOKEN"/>
+		<result property="deviceId" 	column="DEVICE_ID"/>
+		<result property="platformCode" column="PLATFORM_CODE"/>
+		<result property="platformVer" 	column="PLATFORM_VER"/>
+		<result property="deviceType" 	column="DEVICE_TYPE"/>
+		<result property="deviceModel" 	column="DEVICE_MODEL"/>
+	</resultMap>
+		
+	<!-- 즐겨찾기 resultMap -->	
+	<resultMap id="bookmarkListResultMap" type="org.uengine.sns.member.vo.BookmarkVo">
+		<id property="memberId" 	column="MEMBER_ID"/>
+		<result property="feedId"	column="FEED_ID"/>
+	</resultMap>
+	
+	<!-- 그룹 팔로워 resultMap -->
+	<resultMap id="groupFollowerListResultMap" type="org.uengine.sns.group.vo.GroupFollowerVo">
+		<id property="memberId"    		column="MEMBER_ID"/>
+		<result property="groupId" 	   column="GROUP_ID"/>
+		<result property="newFeedCnt"  column="NEW_FEEDCNT"/>
+		<result property="isGroupMng"  column="ISGROUPMNG"/>
+		<result property="isInvite"    column="ISINVITE"/>
+		<result property="invitorId"   column="INVITOR_ID"/>
+		<result property="joinStatus"  column="JOIN_STATUS"/>
+	</resultMap>
+	
+	<!-- 사용자테넌트매핑 resultMap -->	
+	<resultMap id="userTenantMappingListResultMap" type="org.uengine.sns.tenant.vo.UserTenantMappingVo">
+		<id property="memberId"  	  	column="MEMBER_ID"/>
+		<result property="mappingId"	column="MAPPING_ID"/>
+		<result property="partName" 	column="PART_NAME"/>
+		<result property="positionName" column="POSITION_NAME"/>
+		<result property="dutyName" 	column="DUTY_NAME"/>
+		<result property="isSelfPart"   column="ISSELFPART"/>
+		<result property="mappingSeq"   column="MAPPING_SEQ"/>
+		<result property="tenantId" 	column="TENANT_ID"/>
+	</resultMap>
+	
+	<!-- 전체 Member 조회 -->
+	<select id="selectMemberList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="memberListResultMap">
+		SELECT 
+			 TSM.MEMBER_ID,    	  <!-- 사용자 아이디 -->
+			 TSM.MEMBER_NAME,	  <!-- 멤버 이름 -->
+			 TSM.AUTH_HOST,		  <!-- 인증받은 호스트 -->
+			 TSM.TENANT_ID,		  <!-- 테넌트아이디	-->
+			 TSM.ISSYSADMIN,		  <!-- 시스템 관리자 여부 -->
+			 TSM.INVITE_AUTH_KEY,  <!-- 초대 인증키 -->
+			 TSM.ISPUBLIC,		  <!-- 공개여부 -->
+			 TSM.ISENTER,		  <!-- 엔터키 사용 여부 -->
+			 TSM.MEMBER_PIC_URL,	  <!-- 멤버 사진 경로 -->
+			 TSM.MEMBER_THUMB_URL, <!-- 멤버 썸네일 경로 -->
+			 TSM.LANG_SET,	 	  <!-- 언어 설정 -->
+			 TSM.TIMEZONE,		  <!-- 타임존 -->
+			 TSM.ISDELETED,		  <!-- 삭제 여부 -->
+			 TSM.SYNC_KEY,		  <!-- 동기화 키 -->
+			 TSM.LST_SYNC_DTTM, 	  <!-- 최근 동기화 일시 -->
+			 U.LOGIN_ID,		
+			 U.ENCRYPT_SALT,	
+			 U.EMAIL_ADDR,		  <!-- 이메일 주소 -->
+			 U.PHONE,			  <!-- 전화번호 -->
+			 U.HANDPHONE		  <!-- 휴대폰 번호 -->
+			FROM ${defaultTablePrefix}MEMBER TSM
+				LEFT OUTER JOIN ${defaultTablePrefix}USERINFO U ON TSM.SYNC_KEY = U.USER_ID
+			WHERE 1=1
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(memberName)">
+	    	  AND TSM.MEMBER_NAME LIKE '%#{memberName}%'
+		    </if>
+		    <if test="syncKeyList != null">
+	    	  AND TSM.SYNC_KEY IN
+		    	<foreach item="item" index="index" collection="syncKeyList" open="(" separator="," close=")">
+			        #{item}
+			  	</foreach>
+		    </if>
+		    <if test="emailAddr != null">
+   			   AND U.EMAIL_ADDR = #{emailAddr}
+		    </if>
+		    <if test="tenantId > 0">
+	    	   AND TSM.TENANT_ID = #{tenantId}
+		    </if>
+		ORDER BY TSM.MEMBER_ID
+	</select>
+	
+	<select id="selectMemberListWithoutGroupMember" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="memberListResultMap">
+		SELECT 
+			 MEMBER_ID, 
+			 MEMBER_NAME, 
+			 MEMBER_PIC_URL, 
+			 EMAIL_ADDR 
+		FROM ${defaultTablePrefix}MEMBER
+		WHERE 1=1
+		  AND MEMBER_ID NOT IN 
+				( SELECT MEMBER_ID
+				            FROM ${defaultTablePrefix}GRPFWL
+				            WHERE GROUP_ID = #{groupId}
+				)
+		   AND ISDELETED = 0
+		ORDER BY MEMBER_NAME
+	</select>
+	
+	<select id="selectLoginMemberList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="memberListResultMap">
+		SELECT  
+			 M.MEMBER_ID,   <!-- 사용자 아이디 -->
+			 M.MEMBER_NAME,	<!-- 멤버 이름 -->
+			 M.SYNC_KEY,	<!-- 동기화 키 -->
+			 (SELECT TENANT_NAME FROM ${defaultTablePrefix}TENANT WHERE TENANT_ID = M.TENANT_ID) AS COMPANY_NAME
+		FROM ${defaultTablePrefix}MEMBER M
+		WHERE ISDELETED = 0
+		ORDER BY M.TENANT_ID, MEMBER_NAME
+		/* LIMIT 30 */
+	</select>
+	
+	<!-- 멘션 객체에 매핑 -->
+	<select id="selectMentionInfoList" parameterType="map" resultMap="mentionsListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.MEMBER_PIC_URL,	 
+			U.USER_ID,	   
+			U.EMAIL_ADDR,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME,
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS DUTY_NAME,
+			<choose>
+			<when test="lang == 'en'">U.DEPT_NAME_EN</when>
+			<otherwise>U.DEPT_NAME</otherwise>
+			</choose> AS PART_NAME,
+			<choose>
+			<when test="lang == 'en'">U.FULL_DEPT_NAME_EN</when>
+			<otherwise>U.FULL_DEPT_NAME</otherwise>
+			</choose> AS DEPT_FULL_PATH,
+			'icon-16 icon-person' AS ICON,
+			'memberId' AS TYPE
+		 FROM ${defaultTablePrefix}MEMBER TSM
+    	    , ${defaultTablePrefix}USERINFO U
+		WHERE TSM.SYNC_KEY = U.USER_ID
+      	  AND (TSM.MEMBER_NAME LIKE CONCAT(#{term}, '%') OR TSM.MEMBER_NAME_EN LIKE CONCAT(#{term}, '%'))
+      	  AND TSM.TENANT_ID = (SELECT TENANT_ID FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY = #{userId} LIMIT 1)
+      	ORDER BY TSM.MEMBER_NAME
+	</select>
+	
+	<!-- 그룹 Member 조회 -->
+	<select id="selectGroupMember" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="memberListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		  
+			TSM.TENANT_ID,		  
+			TSM.ISSYSADMIN,		  
+			TSM.INVITE_AUTH_KEY,  
+			TSM.ISPUBLIC,		  
+			TSM.ISENTER,		  
+			TSM.MEMBER_PIC_URL,	  
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	  
+			TSM.TIMEZONE,		  
+			TSM.ISDELETED,		  
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM,
+			U.EMAIL_ADDR,		  
+			U.PHONE,			  
+			U.HANDPHONE,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME,
+			<choose>
+			<when test="lang == 'en'">U.DEPT_NAME_EN</when>
+			<otherwise>U.DEPT_NAME</otherwise>
+			</choose> AS PART_NAME,
+			TSGF.REGDTTM
+		FROM ${defaultTablePrefix}MEMBER TSM
+		     JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSM.MEMBER_ID = TSGF.MEMBER_ID
+		     JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+	   WHERE TSGF.GROUP_ID = #{groupId}
+			<if test="cType != null">
+				<choose>
+					<when test="cType == 'manager'">
+						AND TSGF.ISGROUPMNG = '1'
+						AND TSGF.JOIN_STATUS = 'COMPLETE'
+					</when>
+					<when test="cType == 'user'">
+						AND (TSGF.ISGROUPMNG != '1' OR TSGF.ISGROUPMNG IS NULL)
+						AND TSGF.JOIN_STATUS = 'COMPLETE'
+					</when>
+					<otherwise>
+						AND TSGF.ISGROUPMNG != '1'
+						AND TSGF.JOIN_STATUS is null
+					</otherwise>
+				</choose>
+			</if>
+		  AND TSM.ISDELETED = 0
+		ORDER BY TSM.MEMBER_ID
+	</select>
+
+	<!-- 단건의 Member 조회 -->
+	<select id="selectMemberById" parameterType="map" resultMap="memberListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		 
+			TSM.TENANT_ID,	
+			TSM.ISSYSADMIN,		 
+			TSM.INVITE_AUTH_KEY, 
+			TSM.ISPUBLIC,		 
+			TSM.ISENTER,		 
+			TSM.MEMBER_PIC_URL,	 
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	 
+			TSM.TIMEZONE,		 
+			TSM.ISDELETED,		
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM, 	 
+			TSM.REGDTTM,
+			U.LOGIN_ID,		  
+			U.LOGIN_PASSWORD,      
+			U.ENCRYPT_SALT,
+			U.EMAIL_ADDR, 		 
+			U.PHONE,			 
+			U.HANDPHONE,		  
+		    (SELECT COMPANY_ID FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_ID,
+		    (SELECT TENANT_NAME FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_NAME,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM
+      		 LEFT OUTER JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+		WHERE TSM.MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectMemberBySynckey" parameterType="map" resultMap="memberListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		 
+			TSM.TENANT_ID,	
+			TSM.ISSYSADMIN,		 
+			TSM.INVITE_AUTH_KEY, 
+			TSM.ISPUBLIC,		 
+			TSM.ISENTER,		 
+			TSM.MEMBER_PIC_URL,	 
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	 
+			TSM.TIMEZONE,		 
+			TSM.ISDELETED,		
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM, 	 
+			TSM.REGDTTM,
+			U.LOGIN_ID,		  
+			U.LOGIN_PASSWORD,      
+			U.ENCRYPT_SALT,
+			U.EMAIL_ADDR, 		 
+			U.PHONE,			 
+			U.HANDPHONE,		  
+		    (SELECT COMPANY_ID FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_ID,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM
+      		 LEFT OUTER JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+		WHERE TSM.SYNC_KEY = #{syncKey}
+	</select>
+	
+	<select id="selectMemberByEmail" parameterType="map" resultMap="memberListResultMap">
+		
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		 
+			TSM.TENANT_ID,	
+			TSM.ISSYSADMIN,		 
+			TSM.INVITE_AUTH_KEY, 
+			TSM.ISPUBLIC,		 
+			TSM.ISENTER,		 
+			TSM.MEMBER_PIC_URL,	 
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	 
+			TSM.TIMEZONE,		 
+			TSM.ISDELETED,		
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM, 	 
+			TSM.REGDTTM,
+			U.LOGIN_ID,		  
+			U.LOGIN_PASSWORD,      
+			U.ENCRYPT_SALT,
+			U.EMAIL_ADDR, 		 
+			U.PHONE,			 
+			U.HANDPHONE,		  
+		    (SELECT COMPANY_ID FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_ID,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM
+      		 JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+		WHERE U.EMAIL_ADDR = #{email}
+		LIMIT 1
+	</select>
+	
+	<select id="selectGroupWareMemberBySynckey" parameterType="map" resultMap="memberListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		 
+			TSM.TENANT_ID,	
+			TSM.ISSYSADMIN,		 
+			TSM.INVITE_AUTH_KEY, 
+			TSM.ISPUBLIC,		 
+			TSM.ISENTER,		 
+			TSM.MEMBER_PIC_URL,	 
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	 
+			TSM.TIMEZONE,		 
+			TSM.ISDELETED,		
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM, 	 
+			TSM.REGDTTM,
+			U.LOGIN_ID,		  
+			U.LOGIN_PASSWORD,      
+			U.ENCRYPT_SALT,
+			U.EMAIL_ADDR, 		 
+			U.PHONE,			 
+			U.HANDPHONE,		  
+		    (SELECT COMPANY_ID FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_ID,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM
+      		 JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+		WHERE TSM.SYNC_KEY = #{syncKey}
+	</select>
+	
+	<!-- 이메일을 통한 중복 체크 -->
+	<select id="checkMemberByEmail" parameterType="string" resultType="int">
+		SELECT COUNT(*) FROM ${defaultTablePrefix}USERINFO WHERE EMAIL_ADDR = #{emailAddr} 
+	</select>
+	
+	<select id="selectMemberByLoginId" parameterType="map" resultMap="memberListResultMap">
+		SELECT 
+			TSM.MEMBER_ID,    	 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose> ,
+			TSM.AUTH_HOST,		 
+			TSM.TENANT_ID,	
+			TSM.ISSYSADMIN,		 
+			TSM.INVITE_AUTH_KEY, 
+			TSM.ISPUBLIC,		 
+			TSM.ISENTER,		 
+			TSM.MEMBER_PIC_URL,	 
+			TSM.MEMBER_THUMB_URL, 
+			TSM.LANG_SET,	 	 
+			TSM.TIMEZONE,		 
+			TSM.ISDELETED,		
+			TSM.SYNC_KEY,		  
+			TSM.LST_SYNC_DTTM, 	 
+			TSM.REGDTTM,
+			U.LOGIN_ID,		  
+			U.LOGIN_PASSWORD,   
+			U.ENCRYPT_SALT,
+			U.EMAIL_ADDR, 		 
+			U.PHONE,			 
+			U.HANDPHONE,		  
+		    (SELECT COMPANY_ID FROM ${defaultTablePrefix}TENANT T WHERE T.TENANT_ID = TSM.TENANT_ID) AS COMPANY_ID,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM
+      		 JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+		WHERE U.LOGIN_ID = #{loginId}
+	</select>
+	
+	<!-- Member 추가 -->	
+	<insert id="insertMember" parameterType="org.uengine.sns.member.vo.MemberVo">
+		INSERT INTO	${defaultTablePrefix}MEMBER 
+			(
+			 LOGIN_ID,		   <!-- 로그인 아이디 -->	
+			 LOGIN_PASSWORD,   <!-- 로그인 패스워드 -->
+			 MEMBER_NAME,	   <!-- 멤버 이름 -->
+			 AUTH_HOST,		   <!-- 인증받은 호스트 -->
+			 TENANT_ID,		   <!-- 테넌트아이디	-->
+			 ISSYSADMIN,	   <!-- 시스템 관리자 여부 -->
+			 INVITE_AUTH_KEY,  <!-- 초대 인증키 -->
+			 EMAIL_ADDR,	   <!-- 이메일 주소 -->
+			 PHONE,			   <!-- 전화번호 -->
+			 HANDPHONE,		   <!-- 휴대폰 번호 -->
+			 ISPUBLIC,		   <!-- 공개여부 -->
+			 ISENTER,		   <!-- 엔터키 사용 여부 -->
+			 MEMBER_PIC_URL,   <!-- 멤버 사진 경로 -->
+			 MEMBER_THUMB_URL, <!-- 멤버 썸네일 경로 -->
+			 LANG_SET,	 	   <!-- 언어 설정 -->
+			 TIMEZONE,		   <!-- 타임존 -->
+			 ISDELETED,		   <!-- 삭제 여부 -->
+			 SYNC_KEY,		   <!-- 동기화 키 -->
+			 LST_SYNC_DTTM,	   <!-- 최근 동기화 일시 -->
+			 REGDTTM
+	        ) 
+	        VALUES
+	        (
+	         #{loginId			, jdbcType=VARCHAR},    <!-- 로그인 아이디 -->	   
+	         #{loginPassword	, jdbcType=VARCHAR},    <!-- 로그인 패스워드 -->   
+	         #{memberName		, jdbcType=VARCHAR},    <!-- 멤버 이름 -->      
+	         #{authHost			, jdbcType=VARCHAR},    <!-- 인증받은 호스트 -->   
+	         #{tenantId			, jdbcType=INTEGER},  	<!-- 테넌트아이디	-->     	
+			 0,                                         <!-- 시스템 관리자 여부 --> 
+			 #{inviteAuthKey	, jdbcType=VARCHAR},    <!-- 초대 인증키 -->     
+			 #{emailAddr		, jdbcType=VARCHAR},    <!-- 이메일 주소 -->     
+			 #{phone			, jdbcType=VARCHAR},    <!-- 전화번호 -->       
+			 #{handPhone		, jdbcType=VARCHAR},    <!-- 휴대폰 번호 -->     
+			 1,                                         <!-- 공개여부 -->       
+			 0,		                                    <!-- 엔터키 사용 여부 -->  
+	 		 #{memberPicUrl		, jdbcType=VARCHAR},    <!-- 멤버 사진 경로 -->   
+	 		 #{memberThumbUrl	, jdbcType=VARCHAR},    <!-- 멤버 썸네일 경로 -->  
+	 		 #{langSet			, jdbcType=VARCHAR},    <!-- 언어 설정 -->      
+	 		 #{timeZone			, jdbcType=VARCHAR},    <!-- 타임존 -->        
+	 		 0,                                         <!-- 삭제 여부 -->      
+	 		 #{syncKey			, jdbcType=VARCHAR},    <!-- 동기화 키 -->      
+	 		 #{lstSyncDttm		, jdbcType=DATE},	    <!-- 최근 동기화 일시 -->
+	 		 now()
+	 		 )	
+			<selectKey keyProperty="memberId" resultType="long" order="AFTER">
+				SELECT last_insert_id()
+			</selectKey>
+	</insert>
+    
+    <!-- Member 갱신 -->
+    <update id="updateMember" parameterType="org.uengine.sns.member.vo.MemberVo">
+    	UPDATE ${defaultTablePrefix}MEMBER 
+    	   SET MEMBER_ID = #{memberId}
+    		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(loginId)">
+		    	,LOGIN_ID = #{loginId}		    	 <!-- 로그인 아이디 -->
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(loginPassword)">
+				,LOGIN_PASSWORD= #{loginPassword}    <!-- 로그인 패스워드 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(memberName)">  
+				,MEMBER_NAME= #{memberName}	    	 <!-- 멤버 이름 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(authHost)">             
+				,AUTH_HOST= #{authHost}		    	 <!-- 인증받은 호스트 -->
+			</if>
+		    <if test="tenantId > 0 ">       
+				,TENANT_ID= #{tenantId}		    	 <!-- 테넌트아이디	-->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isSysAdmin)">        
+				,ISSYSADMIN= #{isSysAdmin}			 <!-- 시스템 관리자 여부 --> 
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(inviteAuthKey)">   
+				,INVITE_AUTH_KEY= #{inviteAuthKey}   <!-- 초대 인증키 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(emailAddr)">      
+				,EMAIL_ADDR= #{emailAddr}			 <!-- 이메일 주소 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(phone)">           
+				,PHONE= #{phone}			    	 <!-- 전화번호 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(handPhone)">              
+				,HANDPHONE= #{handPhone}		     <!-- 휴대폰 번호 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isPublic)">       
+				,ISPUBLIC= #{isPublic}		    	 <!-- 공개여부 -->              
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isEnter)">
+				,ISENTER= #{isEnter}		    	 <!-- 엔터키 사용 여부 -->      
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(memberPicUrl)">
+				,MEMBER_PIC_URL= #{memberPicUrl}	 <!-- 멤버 사진 경로 -->    
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(memberThumbUrl)">
+				,MEMBER_THUMB_URL= #{memberThumbUrl} <!-- 멤버 썸네일 경로 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(langSet)">
+				,LANG_SET= #{langSet}	 	    	 <!-- 언어 설정 -->             
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(timeZone)">
+				,TIMEZONE= #{timeZone}		    	 <!-- 타임존 -->                
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isDeleted)">
+				,ISDELETED= #{isDeleted}		     <!-- 삭제 여부 -->         
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(syncKey)">
+				,SYNC_KEY= #{syncKey}		    	 <!-- 동기화 키 -->             
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(lstSyncDttm)">
+				,LST_SYNC_DTTM = #{lstSyncDttm} 	 <!-- 최근 동기화 일시 -->      
+    		</if>
+		WHERE MEMBER_ID = ${memberId}
+	</update>
+    
+	<!-- Member 삭제 -->
+	<update id="deleteMember" parameterType="long">
+		UPDATE ${defaultTablePrefix}MEMBER SET ISDELETED = 1 WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+	<select id="selectViewRoleByUserId" parameterType="long" resultType="String">
+		SELECT '1'
+		  FROM (SELECT 1) X
+		 WHERE ('user_id' = (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER WHERE MEMBER_ID = #{value} LIMIT 1) 
+		        OR 1=1)
+		 LIMIT 1
+	</select>
+	
+</mapper>

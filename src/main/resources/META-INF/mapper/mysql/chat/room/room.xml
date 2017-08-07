@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.chat.room.mapper.RoomMapper">
+	
+	<!-- room list resultMap -->
+	<resultMap id="roomListResultMap" type="org.uengine.sns.chat.room.vo.RoomVo">
+		<id property="roomId" 				column="ROOM_ID"/>
+		<result property="roomTitle" 		column="ROOM_TITLE"/>
+		<result property="establisherId" 	column="ESTABLISHER_ID"/>
+		<result property="establisherName"	column="ESTABLISHER_NAME"/>
+		<result property="roomFlag"			column="ROOM_FLAG"/>
+		<result property="status"			column="STATUS"/>    
+		<result property="regDttm"			column="REGDTTM"/>
+		<result property="lastMessage"		column="LAST_MESSAGE"/>   
+		<result property="lastDttm"			column="LASTDTTM"/>
+		<collection property="messageReadVo"	resultMap="readMessageResultMap"/>
+		<collection property="followerList"		javaType="java.util.ArrayList" resultMap="chatFollowerListResultMap"/>
+	</resultMap>
+	
+	<!-- read message resultMap -->	
+	<resultMap id="readMessageResultMap" type="org.uengine.sns.chat.message.vo.MessageReadVo">
+	    <result property="roomId" 	   			column="ROOM_ID"/>
+		<result property="userId"				column="USER_ID"/>
+		<result property="messageCount"		column="MESSAGE_COUNT"/>
+	</resultMap>
+	
+	<!-- follower list resultMap -->	
+	<resultMap id="chatFollowerListResultMap" type="org.uengine.sns.chat.follower.vo.ChatFollowerVo">
+	    <result property="followerId" 	column="FOLLOWER_ID"/>
+		<result property="followerName"	column="FOLLOWER_NAME"/>
+	</resultMap>
+	
+	<!-- Room 생성 -->	
+	<insert id="insertRoom" parameterType="org.uengine.sns.chat.room.vo.RoomVo">
+		INSERT INTO	${defaultTablePrefix}CHAT_ROOM
+		(
+		 ROOM_TITLE,		<!-- 방 타이틀 -->	
+		 ESTABLISHER_ID,	<!-- 개설자 아이디  -->
+		 ESTABLISHER_NAME,	<!-- 개설자 이름 -->
+		 ROOM_FLAG,			<!-- flag -->
+		 STATUS,			<!-- 협상 프로그레스 -->
+		 REGDTTM,			<!-- 방 생성 일시 -->
+		 LASTDTTM			<!--  마지막 메세지 생성일 -->
+        ) 
+        
+        VALUES
+
+        (
+         #{roomTitle,		jdbcType=VARCHAR},	   
+         #{establisherId, 	jdbcType=VARCHAR},
+         #{establisherName,	jdbcType=VARCHAR},
+         #{roomFlag,		jdbcType=VARCHAR},            
+         'RUNNING',
+ 		 now(),
+ 		 now()
+ 		 )
+ 		<selectKey keyProperty="roomId" resultType="long" order="AFTER">
+        	SELECT last_insert_id()
+        </selectKey>
+    </insert>
+    
+    <!-- userId가 포함된 room list 조회 -->
+	<select id="selectAllRoomById" parameterType="string" resultMap="roomListResultMap">
+		SELECT 
+			 CR.ROOM_ID,
+			 CR.ROOM_TITLE,
+			 CR.ESTABLISHER_ID,
+			 CR.ESTABLISHER_NAME,
+			 CR.ROOM_FLAG,
+			 CR.STATUS,
+			 CR.REGDTTM,
+			 CR.LAST_MESSAGE,
+			 CR.LASTDTTM,
+			 CRR.ROOM_ID,
+			 CRR.USER_ID,
+			 CRR.MESSAGE_COUNT,
+			 CF.FOLLOWER_ID,
+			 CF.FOLLOWER_NAME
+			FROM ${defaultTablePrefix}CHAT_ROOM CR
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_READ CRR ON CR.ROOM_ID = CRR.ROOM_ID AND CRR.USER_ID = #{userId}
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CF ON CF.ROOM_ID = CR.ROOM_ID
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CFF ON CFF.ROOM_ID = CR.ROOM_ID
+			WHERE CFF.FOLLOWER_ID = #{userId}
+		 	ORDER BY CR.LASTDTTM DESC
+	</select>
+	
+    <!-- 사용자가 개설한 room list 조회 -->
+	<select id="selectRoomByEstablisherId" parameterType="string" resultMap="roomListResultMap">
+		SELECT 
+			 CR.ROOM_ID,
+			 CR.ROOM_TITLE,
+			 CR.ESTABLISHER_ID,
+			 CR.ESTABLISHER_NAME,
+			 CR.ROOM_FLAG,
+			 CR.STATUS,
+			 CR.REGDTTM,
+			 CR.LAST_MESSAGE,
+			 CR.LASTDTTM,
+			 CRR.ROOM_ID,
+			 CRR.USER_ID,
+			 CRR.MESSAGE_COUNT,   
+			 CF.FOLLOWER_ID,
+			 CF.FOLLOWER_NAME
+			FROM ${defaultTablePrefix}CHAT_ROOM CR
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_READ CRR ON CR.ROOM_ID = CRR.ROOM_ID AND CRR.USER_ID = #{establisherId}
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CF ON CF.ROOM_ID = CR.ROOM_ID
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CFF ON CFF.ROOM_ID = CR.ROOM_ID
+			WHERE CR.ESTABLISHER_ID = #{establisherId}
+			ORDER BY CR.LASTDTTM DESC
+	</select>
+	
+	<!-- roomId에 해당하는 room 조회 -->
+	<select id="selectRoomById" parameterType="map" resultMap="roomListResultMap">
+		SELECT 
+			 CR.ROOM_ID,
+			 CR.ROOM_TITLE,
+			 CR.ESTABLISHER_ID,
+			 CR.ESTABLISHER_NAME,
+			 CR.ROOM_FLAG,
+			 CR.STATUS,
+			 CR.REGDTTM,
+			 CR.LAST_MESSAGE,
+			 CR.LASTDTTM,
+			 CRR.ROOM_ID,
+			 CRR.USER_ID,
+			 CRR.MESSAGE_COUNT,   
+			 CF.FOLLOWER_ID,
+			 CF.FOLLOWER_NAME
+			FROM ${defaultTablePrefix}CHAT_ROOM CR
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_READ CRR ON CR.ROOM_ID = CRR.ROOM_ID AND CRR.USER_ID = #{userId}
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CF ON CF.ROOM_ID = CR.ROOM_ID
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CFF ON CFF.ROOM_ID = CR.ROOM_ID
+			WHERE CR.ROOM_ID = #{roomId}
+		      AND CFF.FOLLOWER_ID = #{userId}
+	</select>
+	
+	<!-- roomFlag에 해당하는 room 조회 -->
+	<select id="selectRoomByFlag" parameterType="map" resultMap="roomListResultMap">
+		SELECT 
+			 CR.ROOM_ID,
+			 CR.ROOM_TITLE,
+			 CR.ESTABLISHER_ID,
+			 CR.ESTABLISHER_NAME,
+			 CR.ROOM_FLAG,
+			 CR.STATUS,
+			 CR.REGDTTM,
+			 CR.LAST_MESSAGE,
+			 CR.LASTDTTM,
+			 CRR.ROOM_ID,
+			 CRR.USER_ID,
+			 CRR.MESSAGE_COUNT,   
+			 CF.FOLLOWER_ID,
+			 CF.FOLLOWER_NAME
+			FROM ${defaultTablePrefix}CHAT_ROOM CR
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_READ CRR ON CR.ROOM_ID = CRR.ROOM_ID AND CRR.USER_ID = #{userId}
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CF ON CF.ROOM_ID = CR.ROOM_ID
+			 LEFT OUTER JOIN ${defaultTablePrefix}CHAT_FOLLOWER CFF ON CFF.ROOM_ID = CR.ROOM_ID
+			WHERE CR.ROOM_FLAG = #{roomFlag}
+		   	  AND CFF.FOLLOWER_ID = #{userId}
+		   	ORDER BY CR.LASTDTTM DESC
+	</select>
+   	<!-- 협상 스테이터스 업데이트 -->
+    <update id="updateRoomStatus" parameterType="org.uengine.sns.chat.room.vo.RoomVo">
+    	UPDATE ${defaultTablePrefix}CHAT_ROOM
+    			SET STATUS = #{status},
+    				LASTDTTM = now()
+    		WHERE ROOM_ID = #{roomId}
+    </update>
+    
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.chat.follower.mapper.ChatFollowerMapper">
+	
+	<!-- message resultMap -->
+	<resultMap id="chatMentionsFollowerListResultMap" type="org.uengine.sns.chat.follower.vo.ChatMentionVo">
+		<result property="mentionId" 	column="SYNC_KEY"/>
+		<result property="mentionName"	column="MEMBER_NAME"/>
+	</resultMap>
+	
+	<!-- follower 추가 -->	
+	<insert id="insertChatFollower" parameterType="org.uengine.sns.chat.follower.vo.ChatFollowerVo">
+		INSERT INTO	${defaultTablePrefix}CHAT_FOLLOWER 
+			(
+			 ROOM_ID,		<!-- 방 아이디 -->	
+			 FOLLOWER_ID,	<!-- 참여자 아이디 -->
+			 FOLLOWER_NAME,	<!-- 참여자 이름 -->
+			 REGDTTM		<!-- 참여 일시 -->
+	        ) 
+        
+        	VALUES
+        
+	        (
+	         #{roomId,			jdbcType=BIGINT},	   
+	         #{followerId,		jdbcType=VARCHAR},      
+	         #{followerName,	jdbcType=VARCHAR},
+	         now()
+	 		 )	
+    </insert>
+    
+    <!-- mention follower list -->
+	<select id="selectChatMentionFollowerList" parameterType="string" resultMap="chatMentionsFollowerListResultMap">
+		SELECT 
+			 SYNC_KEY,	    
+			 MEMBER_NAME	    	 	 
+			FROM ${defaultTablePrefix}MEMBER
+			WHERE 1 = 1
+		  	  AND MEMBER_NAME LIKE CONCAT(#{term}, '%')
+			ORDER BY MEMBER_NAME
+	</select>
+
+</mapper>

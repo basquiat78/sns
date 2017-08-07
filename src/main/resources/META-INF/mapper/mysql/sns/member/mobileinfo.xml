@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.member.mapper.MobileInfoMapper">
+	
+	<!-- 모바일 resultMap -->
+	<resultMap id="mobileInfoResultMap" type="org.uengine.sns.member.vo.MobileInfoVo">
+		<result property="memberId"     column="MEMBER_ID"/>
+		<result property="jId" 		   	column="JID"/>
+		<result property="pnsToken" 	column="PNS_TOKEN"/>
+		<result property="deviceId" 	column="DEVICE_ID"/>
+		<result property="platformCode"	column="PLATFORM_CODE"/>
+		<result property="platformVer"  column="PLATFORM_VER"/>
+		<result property="deviceType"   column="DEVICE_TYPE"/>
+		<result property="deviceModel"  column="DEVICE_MODEL"/>
+		<result property="langSet"   	column="LANG_SET"/>
+	</resultMap>
+
+	<!-- 모바일 정보 조회 -->
+	<select id="selectMobileInfoById" parameterType="long" resultMap="mobileInfoResultMap">
+		SELECT 
+			 MEMBER_ID,   	 <!-- 사용자 아이디 -->
+			 JID,             <!-- 사용자 고유키 -->	
+			 PNS_TOKEN,       <!-- 푸시 토큰값 -->
+			 DEVICE_ID,       <!-- 단말 키 정보 -->
+			 PLATFORM_CODE,   <!-- 단말 종류 -->
+			 PLATFORM_VER,    <!-- 단말 버전	-->
+			 DEVICE_TYPE,     <!-- 단말 해상도 -->
+			 DEVICE_MODEL,    <!-- 단말 도델명 -->
+			 LANG_SET		 <!-- 단말 언어설정 -->
+		FROM ${defaultTablePrefix}MOBILEINFO 
+		WHERE MEMBER_ID = #{memberId}
+	</select>
+	
+	<!-- 모바일 정보 추가 -->	
+	<insert id="insertMobileInfo" parameterType="org.uengine.sns.member.vo.MobileInfoVo">
+		INSERT INTO	${defaultTablePrefix}MOBILEINFO 
+		(
+		 MEMBER_ID,   	  <!-- 사용자 아이디 -->
+		 JID,             <!-- 사용자 고유키 -->	
+	 	 PNS_TOKEN,       <!-- 푸시 토큰값 -->
+		 DEVICE_ID,       <!-- 단말 키 정보 -->
+		 PLATFORM_CODE,   <!-- 단말 종류 -->
+		 PLATFORM_VER,    <!-- 단말 버전	-->
+		 DEVICE_TYPE,     <!-- 단말 해상도 -->
+		 DEVICE_MODEL,    <!-- 단말 도델명 -->
+		 LANG_SET		  <!-- 단말 언어설정 -->
+        ) 
+        VALUES
+        (
+		 #{memberId},
+		 #{jId}, 		
+		 #{pnsToken}, 	
+		 #{deviceId}, 	
+		 #{platformCode,	jdbcType=VARCHAR}, 	
+		 #{platformVer, 	jdbcType=VARCHAR},
+		 #{deviceType, 		jdbcType=VARCHAR}, 
+		 #{deviceModel, 	jdbcType=VARCHAR},
+		 #{langSet, 		jdbcType=VARCHAR}
+ 		 )	
+	</insert>
+    
+    <!-- 모바일 정보 갱신 -->
+	<update id="updateMobileInfo" parameterType="org.uengine.sns.member.vo.MobileInfoVo">
+    	UPDATE ${defaultTablePrefix}MOBILEINFO 
+    	   SET	MEMBER_ID = #{memberId}
+	    		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(jId)">
+	    			,JID 		   =  #{jId} 		   <!-- 사용자 고유키 -->	 
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(pnsToken)">
+	    			,PNS_TOKEN 	   =  #{pnsToken} 	   <!-- 푸시 토큰값 -->    
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(deviceId)">
+	    			,DEVICE_ID 	   =  #{deviceId} 	   <!-- 단말 키 정보 -->   
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(platformCode)">
+	    			,PLATFORM_CODE =  #{platformCode}  <!-- 단말 종류 -->     
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(platformVer)">
+	    			,PLATFORM_VER  =  #{platformVer}   <!-- 단말 버전	-->  
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(deviceType)">
+	    			,DEVICE_TYPE   =  #{deviceType}    <!-- 단말 해상도 -->    
+	    		</if>
+			    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(deviceModel)">
+	    			,DEVICE_MODEL  =  #{deviceModel}   <!-- 단말 도델명 -->    
+	    		</if>
+	    		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(langSet)">
+	    			,LANG_SET      =  #{langSet}       <!-- 단말 언어설정 -->    
+	    		</if>
+    	WHERE MEMBER_ID = ${memberId}
+    	  AND JID = #{jId}
+    	  AND DEVICE_ID = #{deviceId}
+	</update>
+
+    <!-- 모바일 정보 삭제 -->
+	<update id="deleteMobileInfo" parameterType="org.uengine.sns.member.vo.MobileInfoVo">
+    	DELETE ${defaultTablePrefix}MOBILEINFO
+			WHERE MEMBER_ID = #{memberId}
+			  AND JID = #{jId}
+			  AND DEVICE_ID = #{deviceId}
+	</update>
+
+</mapper>

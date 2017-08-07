@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.FeedFileMapper">
+
+	<!-- 피드 파일 리스트  -->
+	<resultMap  id="resultFeedFileList" type="org.uengine.sns.feed.vo.FeedFileVo">
+		<id property="fileId"   			  		column="FILE_ID"/>
+		<result property="fileName" 	  		  	column="FILE_NAME"/>
+		<result property="fileContentType"		  	column="FILE_CONTENT_TYPE"/>
+		<result property="thunmbFileName" 		  	column="THUMB_FILE_NAME"/>
+		<result property="mblThumbFileName"		  	column="MBL_THUMB_FILE_NAME"/>
+		<result property="fileExt" 				  	column="FILE_EXT"/>
+		<result property="repositoryType" 		  	column="REPOSITORY_TYPE"/>
+		<result property="feedId" 				  	column="FEED_ID"/>
+		<result property="fileUrl" 	  			  	column="FILE_URL"/>
+		<result property="isTransfer" 	  		  	column="ISTRANSFER"/>
+		<result property="transferCnt" 	  		  	column="TRANSFER_CNT"/>
+		<result property="regMemberId" 	  		  	column="REG_MEMBER_ID"/>
+		<result property="regMemberName"  		  	column="REG_MEMBER_NAME"/>
+		<result property="regMemberPositionName"	column="REG_MEMBER_POSITION_NAME"/>
+		<result property="regDttm"  			  	column="REGDTTM"/>
+		<result property="fileSaveName" 	      	column="FILE_SAVE_NAME"/>
+	</resultMap>
+	
+	<resultMap id="resultTransferFeedFileList" type="org.uengine.sns.feed.vo.FeedFileVo">
+		<id property="fileId"				column="FILE_ID"/>
+		<result property="fileName"			column="FILE_NAME"/>
+		<result property="fileContentType"	column="FILE_CONTENT_TYPE"/>
+		<result property="fileExt"			column="FILE_EXT"/>
+		<result property="fileUrl"			column="FILE_URL"/>
+		<result property="thunmbFileName" 	column="THUMB_FILE_NAME"/>
+		<result property="mblThumbFileName" column="MBL_THUMB_FILE_NAME"/>
+		<result property="repositoryType" 	column="REPOSITORY_TYPE"/>
+		<result property="isTransfer" 		column="ISTRANSFER"/>
+		<result property="transferCnt" 		column="TRANSFER_CNT"/>
+		<result property="feedId" 			column="FEED_ID"/>
+		<result property="regSyncKey" 		column="SYNC_KEY"/>
+		<result property="fileSaveName" 	column="FILE_SAVE_NAME"/>
+		<collection property="groupVo"	javaType="org.uengine.sns.group.vo.GroupVo" resultMap="resultGroupMap" />
+	</resultMap>
+	
+	<resultMap id="resultGroupMap" type="org.uengine.sns.group.vo.GroupVo">
+		<result property="groupId" 			column="GROUP_ID"/>
+		<result property="targetId" 		column="TARGET_ID"/>
+		<result property="fileRepoId" 		column="FILE_REPO_ID"/>
+	</resultMap>
+	
+	<!-- Feed File등록 -->
+	<insert id="insertFeedFile" parameterType="org.uengine.sns.feed.vo.FeedFileVo" >
+		INSERT INTO ${defaultTablePrefix}ATTACHFILE 
+        	(
+        	FILE_NAME,				<!-- 저장된 파일명 -->
+			FILE_CONTENT_TYPE,		<!-- 파일 컨텐츠 타입 -->
+			THUMB_FILE_NAME,		<!-- 썸네일 파일명 -->
+			MBL_THUMB_FILE_NAME,	<!-- 모바일 썸네일 파일명  -->
+			FILE_EXT,				<!-- 파일 확장자 -->
+			REPOSITORY_TYPE,		<!-- 파일 저장소(로컬, 쉐어포인트) -->
+			FEED_ID,				<!-- 피드 ID -->
+			FILE_URL,				<!-- 파일 URL -->
+			ISTRANSFER,				<!-- 파일 전환 유무 -->
+			TRANSFER_CNT,			<!-- 파일 재시도 횟수 -->
+			REG_MEMBER_ID,			<!-- 파일 등록자 -->
+			FILE_SAVE_NAME
+        	) 
+        	VALUES
+        	(
+        	 #{fileName, 			jdbcType=VARCHAR},
+			 #{fileContentType,		jdbcType=VARCHAR},
+			 #{thunmbFileName, 		jdbcType=VARCHAR},
+			 #{mblThumbFileName,	jdbcType=VARCHAR},
+			 #{fileExt, 			jdbcType=VARCHAR},
+			 #{repositoryType, 		jdbcType=VARCHAR},
+			 #{feedId},
+			 #{fileUrl, 			jdbcType=VARCHAR},
+			 0,
+			 0,
+			 #{regMemberId},
+        	 #{fileSaveName, 		jdbcType=VARCHAR}
+        	)
+			<selectKey keyProperty="fileId" resultType="long" order="AFTER">
+				SELECT last_insert_id()
+			</selectKey>
+	</insert>
+	
+	<!-- fileId에 의한 단일 파일 정보 -->
+	<select id="selectFeedFileById" parameterType="long" resultMap="resultFeedFileList">
+		SELECT
+			 FILE_ID,
+			 FILE_NAME,
+			 FILE_CONTENT_TYPE,
+			 THUMB_FILE_NAME,
+			 MBL_THUMB_FILE_NAME,
+			 FILE_EXT,
+			 REPOSITORY_TYPE,
+			 FEED_ID,
+			 FILE_URL,
+			 ISTRANSFER,
+			 TRANSFER_CNT,
+			 REG_MEMBER_ID,
+			 FILE_SAVE_NAME
+			FROM ${defaultTablePrefix}ATTACHFILE
+        	WHERE FILE_ID = #{fileId}
+	</select>
+	
+	<!-- Feed File등록(개인별) -->
+	<select id="selectFeedFileListByMe" parameterType="map" resultMap="resultFeedFileList">
+		SELECT 
+			  TBSA.FILE_ID,
+			  TBSA.FILE_NAME,
+			  TBSA.FILE_CONTENT_TYPE,
+			  TBSA.THUMB_FILE_NAME,
+			  TBSA.MBL_THUMB_FILE_NAME,
+			  TBSA.FILE_EXT,
+			  TBSA.REPOSITORY_TYPE,
+			  TBSA.FEED_ID,
+			  TBSA.FILE_URL,
+			  TBSA.ISTRANSFER,
+			  TBSA.TRANSFER_CNT,
+			  TBSA.REG_MEMBER_ID,
+			  TBSA.FILE_SAVE_NAME,
+			  TBSA.REG_MEMBER_ID,
+				(SELECT 
+						<choose>
+						<when test="lang == 'en'">MEMBER_NAME_EN</when>
+						<otherwise>MEMBER_NAME</otherwise>
+						</choose> 
+				   FROM ${defaultTablePrefix}MEMBER 
+				  WHERE MEMBER_ID = TBSA.REG_MEMBER_ID) AS REG_MEMBER_NAME,
+				(SELECT 
+						<choose>
+						<when test="lang == 'en'">POSITION_NAME_EN</when>
+						<otherwise>POSITION_NAME</otherwise>
+						</choose>
+				  FROM ${defaultTablePrefix}MEMBER TSM, ${defaultTablePrefix}USERINFO U 
+				  WHERE TSM.SYNC_KEY = U.USER_ID
+				    AND TSM.MEMBER_ID = TBSA.REG_MEMBER_ID
+				  LIMIT 1) AS JOB_POSITION_NAME,
+			  (SELECT X.REGDTTM FROM ${defaultTablePrefix}FEED X where X.FEED_ID = TBSA.FEED_ID LIMIT 1) AS REGDTTM
+           FROM (  
+			  SELECT 
+				     FILE_ID
+				FROM (
+				 SELECT 
+                   		TSAF.FILE_ID
+				   FROM (
+						 SELECT  
+								DISTINCT
+								A.ITEM_ID
+						   FROM (
+							<if test="extMemberId == memberId">
+								SELECT 
+	                                   TSFF.ITEM_ID as ITEM_ID
+	                              FROM ${defaultTablePrefix}FOLLOWER TSFF
+	                             WHERE TSFF.ITEM_TYPE     = 'FEED'
+	                               AND TSFF.FOLLOWER_TYPE = 'MEMBER'
+	                               AND TSFF.FOLLOWER_ID   = #{memberId}
+	                               AND EXISTS (SELECT 0
+	                                            FROM ${defaultTablePrefix}FEED TSF
+	                                           WHERE TSFF.ITEM_ID = TSF.FEED_ID
+	                                             AND TSF.ISDELETED = 0
+	                                           LIMIT 1)
+								UNION ALL
+								SELECT 
+									   TSAF.FEED_ID
+								  FROM ${defaultTablePrefix}ATTACHFILE TSAF
+								 WHERE TSAF.REG_MEMBER_ID = #{memberId}
+								UNION ALL
+								SELECT 
+	                                   TSC.FEED_ID as ITEM_ID
+	                              FROM ${defaultTablePrefix}FOLLOWER TSFF
+	                                 , ${defaultTablePrefix}FEED TSC
+	                             WHERE TSC.P_FEED_ID = TSFF.ITEM_ID
+	                               AND TSC.FEED_TYPE = 'COMMENT'
+	                               AND TSC.ISDELETED = 0
+	                               AND TSFF.ITEM_TYPE     = 'FEED'
+	                               AND TSFF.FOLLOWER_TYPE = 'MEMBER'
+	                               AND TSFF.FOLLOWER_ID   = #{memberId}
+	                               AND EXISTS (SELECT  0
+	                                            FROM ${defaultTablePrefix}FEED TSF
+	                                           WHERE TSF.FEED_ID = TSFF.ITEM_ID
+	                                             AND TSF.ISDELETED = 0
+	                                           LIMIT 1)
+							</if>
+							<if test="extMemberId != memberId">
+								 SELECT 
+									   TSFF.ITEM_ID
+								   FROM ${defaultTablePrefix}FOLLOWER TSFF, ${defaultTablePrefix}FEED TSF
+								  WHERE TSFF.ITEM_TYPE     = 'FEED'
+								    AND TSFF.FOLLOWER_TYPE = 'MEMBER'
+								    AND TSFF.FOLLOWER_ID   = #{extMemberId}
+									AND TSFF.ITEM_ID = TSF.FEED_ID
+									AND TSF.ISDELETED = 0
+								    AND EXISTS (SELECT 'x' 
+												 FROM ${defaultTablePrefix}FOLLOWER TSF2
+												WHERE TSFF.ITEM_ID = TSF2.ITEM_ID
+												 AND TSF2.ITEM_TYPE     = 'FEED'
+												 AND TSF2.FOLLOWER_TYPE = 'MEMBER'
+												 AND TSF2.FOLLOWER_ID   = #{memberId}
+												LIMIT 1
+											  )
+							</if>
+								) A
+						) A
+						, ${defaultTablePrefix}ATTACHFILE TSAF
+					WHERE A.ITEM_ID = TSAF.FEED_ID
+					  <if test="fileId > 0">		
+					  AND <![CDATA[ TSAF.FILE_ID <  #{fileId}  ]]>
+					  </if>
+	             ORDER BY TSAF.FILE_ID DESC
+			 	 LIMIT 20
+	           ) A
+		   ) A
+		   , ${defaultTablePrefix}ATTACHFILE TBSA
+	    WHERE A.FILE_ID = TBSA.FILE_ID
+		ORDER BY A.FILE_ID DESC
+	</select>
+	
+	<!-- Feed File 조회(그룹별) -->
+	<select id="selectFeedFileListByGroup" parameterType="map" resultMap="resultFeedFileList">
+		SELECT X.*
+       		 , IFNULL(X.TRANSFER_DTTM, X.FEED_REGDTTM) AS REGDTTM 
+       		 , (SELECT 
+				    <choose>
+				    <when test="lang == 'en'">MEMBER_NAME_EN AS REG_MEMBER_NAME</when>
+				    <otherwise>MEMBER_NAME AS REG_MEMBER_NAME</otherwise>
+				    </choose> 
+       		      FROM ${defaultTablePrefix}MEMBER 
+       		     WHERE MEMBER_ID = X.REG_MEMBER_ID LIMIT 1) AS REG_MEMBER_NAME
+       		 , (SELECT 
+       		        <choose>
+			   		<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			   		<otherwise>U.POSITION_NAME</otherwise>
+			   		</choose> 
+			      FROM ${defaultTablePrefix}MEMBER TSM
+               		 , ${defaultTablePrefix}USERINFO U
+			     WHERE U.USER_ID = TSM.SYNC_KEY
+	               AND TSM.MEMBER_ID = X.REG_MEMBER_ID) AS JOB_POSITION_NAME
+		FROM (
+			SELECT 
+						TSAF.FILE_ID,
+						TSAF.FILE_NAME,
+						TSAF.FILE_CONTENT_TYPE,
+						TSAF.THUMB_FILE_NAME,
+						TSAF.MBL_THUMB_FILE_NAME,
+						TSAF.FILE_EXT,
+						TSAF.REPOSITORY_TYPE,
+						TSAF.FEED_ID,
+						TSAF.FILE_URL,
+						TSAF.ISTRANSFER,
+						TSAF.TRANSFER_CNT,
+						TSAF.REG_MEMBER_ID,
+						TSF.REGDTTM AS FEED_REGDTTM,
+						TSAF.TRANSFER_DTTM
+						, TSAF.FILE_SAVE_NAME
+			FROM ${defaultTablePrefix}FEED TSF
+			   , (SELECT DISTINCT FEED_ID 
+	                FROM (SELECT 	ITEM_ID AS FEED_ID
+							FROM ${defaultTablePrefix}FOLLOWER 
+						   WHERE ITEM_TYPE     = 'FEED'
+						     AND FOLLOWER_TYPE = 'GROUP'  
+						     AND FOLLOWER_ID   = #{groupId}
+			              UNION ALL
+	         			  SELECT 	TSF.FEED_ID
+						    FROM ${defaultTablePrefix}FOLLOWER TSFF, ${defaultTablePrefix}FEED TSF
+						   WHERE TSFF.ITEM_TYPE     = 'FEED'
+						     AND TSFF.FOLLOWER_TYPE = 'GROUP'  
+		                     AND TSFF.ITEM_ID = TSF.P_FEED_ID
+						     AND TSFF.FOLLOWER_ID   = #{groupId} 
+						 ) A ) TSFF
+			   , ${defaultTablePrefix}ATTACHFILE TSAF
+			WHERE TSF.FEED_ID = TSFF.FEED_ID
+			AND TSFF.FEED_ID = TSAF.FEED_ID
+			AND TSF.ISDELETED = 0
+			
+			<if test="fileId == 0">	
+				AND <![CDATA[ TSAF.FILE_ID > 0  ]]>
+			</if>
+			<if test="fileId > 0">	
+            	AND <![CDATA[ TSAF.FILE_ID < #{fileId}  ]]>
+            </if>
+            ORDER BY TSAF.FILE_ID DESC
+			LIMIT 20
+			) X
+	</select>
+	
+	<select id="selectTransferSharePointFileList" parameterType="long" resultMap="resultTransferFeedFileList">
+		SELECT 
+		     TSA.*
+		    ,TSM.SYNC_KEY
+		    ,TSG.* 
+		FROM ${defaultTablePrefix}ATTACHFILE TSA
+		
+		  INNER JOIN ${defaultTablePrefix}MEMBER TSM ON TSM.MEMBER_ID = TSA.REG_MEMBER_ID
+		  
+		  INNER JOIN (
+		    SELECT 
+		       TSG.GROUP_ID
+		      ,TSG.TARGET_ID
+		      ,TSG.FILE_REPO_ID
+		      ,TSF.ITEM_ID 
+		    FROM ${defaultTablePrefix}FOLLOWER  TSF
+		      INNER JOIN ${defaultTablePrefix}GROUP TSG ON TSF.FOLLOWER_ID = TSG.GROUP_ID
+		        AND TSG.TARGET_TYPE = 'SHAREPOINT'
+		        AND TSG.ISDELETED   = 0
+		    WHERE TSF.ITEM_TYPE		= 'FEED' 
+		    AND   TSF.FOLLOWER_TYPE	= 'GROUP'
+		  ) TSG ON TSA.FEED_ID	 	= TSG.ITEM_ID
+		  
+		WHERE TSA.ISTRANSFER   = 0
+		  AND TSA.REPOSITORY_TYPE = 'LOCAL'
+		  AND TSA.TRANSFER_CNT = #{transferCnt}
+	</select>
+	
+	<update id="updateTransferSuccess" parameterType="org.uengine.sns.feed.vo.FeedFileVo">
+    	UPDATE ${defaultTablePrefix}ATTACHFILE 
+    	   SET ISTRANSFER = #{isTransfer}
+    	   <if test="isTransfer == 1">	
+    	     , TRANSFER_DTTM = now()
+    	     , REPOSITORY_TYPE = 'SHAREPOINT'
+    	     , FILE_URL = #{fileUrl}
+    	   </if>
+    	 WHERE FILE_ID = #{fileId}
+	</update>
+    
+	<update id="updateTransferFail" parameterType="org.uengine.sns.feed.vo.FeedFileVo">
+    	UPDATE ${defaultTablePrefix}ATTACHFILE
+    	   SET TRANSFER_CNT = IFNULL(TRANSFER_CNT, 0)+1,
+    	       ISTRANSFER = 0
+    	 WHERE FILE_ID = #{fileId}
+	</update>
+
+</mapper>

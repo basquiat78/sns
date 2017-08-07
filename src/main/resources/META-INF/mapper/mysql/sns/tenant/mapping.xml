@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.tenant.mapper.UserTenantMappingMapper">
+	
+	<!-- Mapping resultMap -->
+	<resultMap id="mappingListResultMap" type="org.uengine.sns.tenant.vo.UserTenantMappingVo">
+	<id property="mappingId"		column="MAPPING_ID"/>
+	<result property="partName" 	column="PART_NAME"/>
+	<result property="positionName"	column="POSITION_NAME"/>
+	<result property="dutyName" 	column="DUTY_NAME"/>
+	<result property="isSelfPart"   column="ISSELFPART"/>
+	<result property="mappingSeq"   column="MAPPING_SEQ"/>
+	<result property="tenantId" 	column="TENANT_ID"/>
+	<result property="memberId"     column="MEMBER_ID"/>
+	<result property="syncKey"      column="SYNC_KEY"/>
+	</resultMap>
+	
+	<!-- 그룹웨어 뷰에서 사용자 부서, 직위, 직책 정보 조회 -->
+	<select id="selectMappingByMemberId" parameterType="map" resultMap="mappingListResultMap">
+		SELECT 
+			 0 AS MAPPING_ID,
+			 TSM.TENANT_ID,
+			 TSM.MEMBER_ID,
+			 TSM.SYNC_KEY,
+			 <choose>
+				 <when test="lang == 'en'">U.POSITION_NAME_EN</when>
+				 <otherwise>U.POSITION_NAME</otherwise>
+			 </choose> AS POSITION_NAME,
+			 <choose>
+				 <when test="lang == 'en'">U.DUTY_NAME_EN</when>
+				 <otherwise>U.DUTY_NAME</otherwise>
+			 </choose> AS DUTY_NAME,
+			 <choose>
+				 <when test="lang == 'en'">U.DEPT_NAME_EN</when>
+				 <otherwise>U.DEPT_NAME</otherwise>
+			 </choose> AS PART_NAME,
+			 <choose>
+				 <when test="lang == 'en'">U.FULL_DEPT_NAME_EN</when>
+				 <otherwise>U.FULL_DEPT_NAME</otherwise>
+			 </choose> AS DEPT_FULL_PATH,
+			 1 AS ISSELFPART,
+			 1 AS MAPPING_SEQ
+			FROM ${defaultTablePrefix}MEMBER TSM,
+		         ${defaultTablePrefix}USERINFO U
+		 	WHERE U.USER_ID = TSM.SYNC_KEY
+		   	  AND TSM.MEMBER_ID = #{memberId}
+	</select>
+	
+</mapper>

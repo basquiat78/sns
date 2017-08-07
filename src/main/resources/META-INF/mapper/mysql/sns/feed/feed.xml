@@ -1,0 +1,1418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.FeedMapper">
+
+	<!-- 칼렌다 리스트 -->
+	<resultMap id="resultCalendarList" type="org.uengine.sns.feed.vo.CalendarVo">
+		<result property="feedId" 			column="FEED_ID"/>
+		<result property="realTitle" 		column="REAL_TITLE"/>
+		<result property="title" 		    column="TITLE"/>
+		<result property="start" 			column="DUEDATE"/>
+		<result property="end" 				column="DUEDATE"/>
+		<result property="endInfo"			column="ENDDATE"/>
+		<result property="regMemberId" 		column="REG_MEMBER_ID"/>
+		<result property="color" 			column="COLOR"/>
+		<result property="processingColor" 	column="PROCESSINGCOLOR"/>
+		<result property="notCompleteColor"	column="NOTCOMPLETECOLOR"/>
+		<result property="completeColor" 	column="COMPLETECOLOR"/>
+	</resultMap>
+	
+	<resultMap id="resultTodoFeedList" type="org.uengine.sns.feed.vo.FeedVo">
+		<result property="feedId" 		column="FEED_ID"/>
+		<result property="feedTitle"	column="FEED_TITLE"/>
+		<result property="dueDate" 		column="DUEDATE"/>
+		<result property="toDoType" 	column="TODO_TYPE"/>
+	</resultMap>
+
+	<!-- 한 페이지내에 볼 피드 아이디  -->
+	<resultMap id="resultFeedIdList" type="java.lang.Long">
+		<id property="feedId"   		column="FEED_ID" />
+	</resultMap>
+
+	<resultMap id="resultCommentFeedIdList" type="long">
+		<result property="cmtFeedId"	column="FEED_ID"/>
+	</resultMap>
+	
+	<!-- 한 페이지내에 볼 피드 아이디  -->
+	<resultMap id="resultLikeitList" type="org.uengine.sns.feed.vo.LikeItVo">
+		<id property="regMemberId"	column="LIKEIT_MEMBER_ID" />
+	</resultMap>
+
+	<!-- 원 피드 리스트  -->
+	<resultMap id="resultFeedList" type="org.uengine.sns.feed.vo.FeedVo">
+		<id property="feedId"   			column="FEED_ID" />
+		<result property="feedTitle" 	  	column="FEED_TITLE"/>
+		<result property="pFeedId" 	  		column="P_FEED_ID"/>
+		<result property="pMemberId"  		column="P_MEMBER_ID"/>
+		<result property="regMemberId" 	  	column="REG_MEMBER_ID"/>
+		<result property="feedType" 	  	column="FEED_TYPE"/>
+		<result property="contentsType" 	column="CONTENTS_TYPE"/>
+		<result property="approvalStatus" 	column="APPROVAL_STATUS"/>
+		<result property="cmtLstSecFeedId"	column="CMT_LST_SEC_FEED_ID"/>
+		<result property="feedContents" 	column="FEED_CONTENTS" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="dueDate" 			column="DUEDATE"/>
+		<result property="endDate" 			column="ENDDATE"/>
+		<result property="regDttm" 			column="REGDTTM"/>
+		<result property="likeItCnt" 	  	column="LIKEIT_CNT"/>
+		<result property="shareCnt" 	  	column="SHARE_CNT"/>
+		<result property="fileCnt" 	  		column="FILE_CNT"/>
+		<result property="cmtCnt" 	  		column="CMT_CNT"/>
+		<result property="tenantId" 	  	column="TENANT_ID"/>
+		<result property="tenantFeedId" 	column="TENANT_FEED_ID"/>
+		<result property="likeIt" 			column="LIKEIT"/>
+		<result property="infId" 			column="INF_ID"/>
+		<result property="isPublic" 		column="ISPUBLIC"/>
+		<result property="isFollow"			column="IS_FOLLOW"/>
+		<result property="followerCnt"		column="FOLLOWER_CNT"/>
+		<result property="tagCnt"			column="TAG_CNT"/>
+		<result property="knwldgCnt"		column="KNWLDG_CNT"/>
+		<result property="isDeleted"		column="ISDELETED"/>
+		<collection property="memberVo"	javaType="org.uengine.sns.member.vo.MemberVo" resultMap="resultMemberMap" />
+		<collection property="tenantVo" javaType="org.uengine.sns.tenant.vo.TenantVo" resultMap="resultTenantMap" />
+	</resultMap>
+
+	<!-- 원 피드 댓글 리스트  -->
+	<resultMap id="resultFeedCommentList" type="org.uengine.sns.feed.vo.FeedVo">
+		<id property="feedId"   			column="FEED_ID" />
+		<result property="feedTitle" 	  	column="FEED_TITLE"/>
+		<result property="pFeedId" 	  		column="P_FEED_ID"/>
+		<result property="pMemberId"  		column="P_MEMBER_ID"/>
+		<result property="pMemberName"  	column="P_MEMBER_NAME"/>
+		<result property="regMemberId" 	  	column="REG_MEMBER_ID"/>
+		<result property="feedType" 	  	column="FEED_TYPE"/>
+		<result property="contentsType" 	column="CONTENTS_TYPE"/>
+		<result property="approvalStatus" 	column="APPROVAL_STATUS"/>
+		<result property="cmtLstSecFeedId" 	column="CMT_LST_SEC_FEED_ID"/>
+		<result property="feedContents" 	column="FEED_CONTENTS" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="dueDate" 			column="DUEDATE"/>
+		<result property="endDate" 			column="ENDDATE"/>
+		<result property="regDttm" 			column="REGDTTM"/>
+		<result property="likeItCnt" 	  	column="LIKEIT_CNT"/>
+		<result property="shareCnt" 	  	column="SHARE_CNT"/>
+		<result property="fileCnt" 	  		column="FILE_CNT"/>
+		<result property="cmtCnt" 	  		column="CMT_CNT"/>
+		<result property="tenantId" 	  	column="TENANT_ID"/>
+		<result property="tenantFeedId" 	column="TENANT_FEED_ID"/>
+		<result property="likeIt" 			column="LIKEIT"/>
+		<result property="infId" 			column="INF_ID"/>
+		<collection property="memberVo" 		 javaType="org.uengine.sns.member.vo.MemberVo" resultMap="resultMemberMap" />
+		<collection property="fileList" 		 javaType="java.util.ArrayList" resultMap="resultFeedFileList"/>
+		<collection property="likeItList" 		 javaType="java.util.ArrayList" resultMap="resultLikeitList"/>
+	</resultMap>
+
+	<!-- 피드에 대한 테넌트 정보  -->
+	<resultMap id="resultTenantMap" type="org.uengine.sns.tenant.vo.TenantVo">
+		<result property="tenantName"      	column="TENANT_NAME"/>
+		<result property="networkApiUrl"    column="NETWORK_API_URL"/>
+		<result property="networkAuthIp"    column="NETWORK_AUTH_IP"/>
+		<result property="networkAuthToken"	column="NETWORK_AUTH_TOKEN"/>
+	</resultMap>
+
+	<!-- 피드에 대한 멤버 정보  -->
+	<resultMap id="resultMemberMap" type="org.uengine.sns.member.vo.MemberVo">
+		<result property="memberName" 			column="MEMBER_NAME"/>
+		<result property="memberId" 			column="MEMBER_ID"/>
+		<result property="syncKey" 				column="SYNC_KEY"/>
+		<result property="memberThumbUrl" 		column="MEMBER_THUMB_URL"/>
+		<result property="memberPartName" 	 	column="MEMBER_PART_NAME"/>
+		<result property="memberPositionName"	column="MEMBER_POSITION_NAME"/>
+		<result property="memberDutyName" 		column="MEMBER_DUTY_NAME"/>
+	</resultMap>
+
+	<!-- 원피드 파일 리스트 -->
+	<resultMap id="resultFeedFileList" type="org.uengine.sns.feed.vo.FeedFileVo">
+		<id property="fileId"				column="FILE_ID"/>
+		<result property="fileName"			column="FILE_NAME"/>
+		<result property="fileContentType"	column="FILE_CONTENT_TYPE"/>
+		<result property="fileExt"			column="FILE_EXT"/>
+		<result property="fileUrl"			column="FILE_URL"/>
+		<result property="thunmbFileName" 	column="THUMB_FILE_NAME"/>
+		<result property="mblThumbFileName" column="MBL_THUMB_FILE_NAME"/>
+		<result property="repositoryType" 	column="REPOSITORY_TYPE"/>
+		<result property="isTransfer" 		column="ISTRANSFER"/>
+		<result property="feedId" 			column="FEED_ID"/>
+	</resultMap>
+
+	<!-- 원피드 팔로우 리스트 -->
+	<resultMap id="resultFeedFollowerList" 	type="org.uengine.sns.feed.vo.FollowerVo">
+		<result property="itemId" 					column="ITEM_ID"/>
+		<result property="itemType" 				column="ITEM_TYPE"/>
+		<result property="followerId" 				column="FOLLOWER_ID"/>
+		<result property="followerType" 			column="FOLLOWER_TYPE"/>
+		<result property="followerName" 			column="FOLLOWER_NAME"/>
+		<result property="followerImgUrl" 			column="FOLLOWER_IMG_URL"/>
+		<result property="followerMemberSyncKey"	column="SYNC_KEY"/>
+		<result property="isPublic" 				column="ISPUBLIC"/>
+	</resultMap>
+
+	<!-- 원피드 태그 리스트 -->
+	<resultMap id="resultFeedTagList" type="org.uengine.sns.feed.vo.TagVo">
+		<result property="feedId" 	column="FEED_ID"/>
+		<result property="tagName"	column="TAG_NAME"/>
+	</resultMap>
+	
+	<select id="selectFeedIdList" parameterType="map" resultMap="resultFeedIdList">
+		SELECT ITEM_ID AS FEED_ID
+		FROM (  
+			SELECT 
+			       A.ITEM_ID
+			  FROM (
+			        SELECT  
+			               DISTINCT
+			               A.ITEM_ID
+			          FROM (
+						<if test="targetMemberId == sessionMemberId">
+			               SELECT 
+			                      TSFF.ITEM_ID
+			                 FROM ${defaultTablePrefix}FOLLOWER TSFF
+			                WHERE TSFF.ITEM_TYPE     = 'FEED'
+			                   AND TSFF.FOLLOWER_TYPE = 'MEMBER'
+			                   AND TSFF.FOLLOWER_ID   = #{targetMemberId}
+			              <if test="searchType != 'MEMBER'">
+			               UNION ALL
+			               SELECT 
+			                      TSFF.ITEM_ID
+			                 FROM ${defaultTablePrefix}GRPFWL TSGF
+			                    , ${defaultTablePrefix}FOLLOWER TSFF
+			                WHERE TSGF.GROUP_ID      = TSFF.FOLLOWER_ID
+			                  AND TSFF.ITEM_TYPE     = 'FEED'
+			                  AND TSFF.FOLLOWER_TYPE = 'GROUP'  
+			                  AND TSGF.MEMBER_ID     = #{targetMemberId}
+			                  AND TSGF.JOIN_STATUS   = 'COMPLETE'
+			               UNION ALL
+			               SELECT 
+			                       TSFF.ITEM_ID
+			                 FROM (SELECT DISTINCT
+			                            A.DEPT_ID
+			                         FROM ${defaultTablePrefix}USERINFO A
+			                        WHERE A.USER_ID IN (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER 
+								                         WHERE MEMBER_ID = #{targetMemberId})
+			                       ) A
+			                     , ${defaultTablePrefix}GROUP TSG
+			                     , ${defaultTablePrefix}FOLLOWER TSFF
+			                WHERE A.DEPT_ID = TSG.TARGET_ID
+			                  AND TSG.GROUP_ID = TSFF.FOLLOWER_ID
+			                  AND TSFF.ITEM_TYPE     = 'FEED'
+			                  AND TSFF.FOLLOWER_TYPE = 'GROUP'   
+			                  AND TSG.GROUP_TYPE     = 'ORGANIZATION'
+	            		  </if>
+	            		</if>
+						<if test="targetMemberId != sessionMemberId">
+			                 SELECT 
+							       TSF1.ITEM_ID
+							  FROM ${defaultTablePrefix}FOLLOWER TSF1
+							 WHERE TSF1.ITEM_TYPE     = 'FEED'
+							   AND TSF1.FOLLOWER_TYPE = 'MEMBER'
+							   AND TSF1.FOLLOWER_ID   = #{targetMemberId}
+							   AND EXISTS (SELECT 'x' 
+							                 FROM ${defaultTablePrefix}FOLLOWER TSF2
+							                WHERE TSF1.ITEM_ID = TSF2.ITEM_ID
+							                 AND TSF2.ITEM_TYPE     = 'FEED'
+							                 AND TSF2.FOLLOWER_TYPE = 'MEMBER'
+							                 AND TSF2.FOLLOWER_ID   = #{sessionMemberId}
+							                LIMIT 1
+							              )
+	            		</if>
+			               ) A
+			       ) A
+			       , ${defaultTablePrefix}FEED TSF
+			   WHERE A.ITEM_ID =  TSF.FEED_ID
+			     AND TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+			     AND TSF.ISDELETED = 0
+	  		 	<if test="feedId > 0">
+	             AND <![CDATA[ TSF.CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+	            </if>
+	            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedType)">
+				 AND TSF.FEED_TYPE = #{feedType}
+				</if>
+	            <!-- 모바일에서는 할일 피드에 대해 달력으로 표현하지 않고 일반적인 피드 형태로 제공되어야 하기에 추가(모바일 전용 필드) -->
+	            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(dueDate)">
+				AND DUEDATE > '0'
+				</if>
+				<if test="fromDate != null or toDate != null">
+				AND FEED_ID IN (SELECT FEED_ID FROM ${defaultTablePrefix}FEED S
+				                WHERE 1=1
+				  <choose>
+					<when test="fromDate != null and toDate != null">
+								AND S.REGDTTM BETWEEN STR_TO_DATE(CONCAT(#{fromDate} , '0000'), '%Y-%m-%d%H%i') AND STR_TO_DATE(CONCAT(#{toDate} , '2359'), '%Y-%m-%d%H%i')
+					</when>
+					<when test="fromDate != null">
+						<![CDATA[ AND S.REGDTTM >= STR_TO_DATE(CONCAT(#{fromDate} , '0000'), '%Y-%m-%d%H%i') ]]>
+					</when>
+					<when test="toDate != null">
+						<![CDATA[ AND S.REGDTTM <= STR_TO_DATE(CONCAT(#{toDate} , '2359'), '%Y-%m-%d%H%i') ]]>
+					</when>
+				  </choose>
+				  			)
+				</if>
+			   ORDER by TSF.CMT_LST_REGDTTM DESC
+	  		<if test="@org.apache.commons.lang.StringUtils@isEmpty(selectType)">
+	  			<choose>
+	  				<when test="rowNumToShow != null and rowNumToShow != ''">
+	  					LIMIT #{rowNumToShow}
+	  				</when>
+	  				<otherwise>LIMIT 7</otherwise>
+	  			</choose>
+	  		</if>
+	  		) X
+	</select>
+	
+	<select id="selectAllFeedIdList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		FROM (  
+			SELECT 	FEED_ID 
+			FROM 	${defaultTablePrefix}FEED 
+            WHERE  	FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+            AND     ISDELETED = 0
+  		 	<if test="feedId>0">
+            AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+            </if>
+            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedType)">
+			AND FEED_TYPE = #{feedType}
+			</if>
+			<if test="memberId > 0">
+				<if test="memberId == sessionMemberId">
+            AND  FEED_ID IN (
+            
+                 SELECT  	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'MEMBER'
+                 AND		FOLLOWER_ID   = #{memberId}
+                 
+                 UNION ALL
+                 SELECT 	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'GROUP'  
+                 AND		FOLLOWER_ID IN (
+		                          SELECT GROUP_ID
+		                          FROM   ${defaultTablePrefix}GRPFWL 
+		                          WHERE  MEMBER_ID = #{memberId}
+		                          AND    JOIN_STATUS = 'COMPLETE'
+		                          UNION ALL
+		                          SELECT GROUP_ID
+		                          FROM   ${defaultTablePrefix}GROUP 
+		                          WHERE  GROUP_TYPE = 'ORGANIZATION'
+		                          AND    TARGET_ID in (
+		                                            SELECT A.DEPT_ID FROM ${defaultTablePrefix}USERINFO A
+							                        WHERE A.USER_ID IN (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER 
+							                                             WHERE MEMBER_ID = #{memberId})
+		                          )
+                          )
+                 ) 
+            	</if>
+				<if test="memberId != sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	TSF1.ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER TSF1, ${defaultTablePrefix}FOLLOWER TSF2
+                 WHERE    	TSF1.ITEM_ID = TSF2.ITEM_ID
+                 AND 		TSF1.ITEM_TYPE     = 'FEED'
+                 AND 		TSF1.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF1.FOLLOWER_ID   = #{memberId}
+                 AND    	TSF2.ITEM_TYPE     = 'FEED'
+                 AND 		TSF2.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF2.FOLLOWER_ID   = #{sessionMemberId}
+                 ) 
+            	</if>
+            </if>
+            <!-- 모바일에서는 할일 피드에 대해 달력으로 표현하지 않고 일반적인 피드 형태로 제공되어야 하기에 추가(모바일 전용 필드) -->
+            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(dueDate)">
+			AND DUEDATE > 0
+			</if>
+            
+            ORDER BY CMT_LST_REGDTTM DESC 
+  		<if test="@org.apache.commons.lang.StringUtils@isEmpty(selectType)">
+  			<choose>
+  				<when test="rowNumToShow != null and rowNumToShow != ''">
+  					LIMIT #{rowNumToShow}
+  				</when>
+  				<otherwise>LIMIT 7</otherwise>
+  			</choose>
+  		</if>
+  		) X
+	</select>
+	
+	<select id="selectGroupFeedIdListByRegDttm" parameterType="org.uengine.sns.notice.vo.NoticeVo" resultMap="resultFeedIdList">
+		SELECT 	FEED_ID 
+		FROM 	${defaultTablePrefix}FEED 
+           WHERE   FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+           AND     ISDELETED = 0
+           AND  FEED_ID IN (
+                SELECT 	ITEM_ID
+                FROM 	${defaultTablePrefix}FOLLOWER 
+                WHERE 	ITEM_TYPE     = 'FEED'
+                AND 	FOLLOWER_TYPE = 'GROUP'  
+                AND		FOLLOWER_ID   = #{itemId}
+           )
+
+		AND <![CDATA[  REGDTTM > #{regDttm} ]]>
+	</select>
+	
+	<select id="selectGroupFeedIdList" parameterType="map" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		  FROM (  
+				SELECT A.FEED_ID
+				  FROM (
+						SELECT ITEM_ID AS FEED_ID
+						FROM ( 
+							  SELECT ITEM_ID 
+							    FROM ${defaultTablePrefix}FOLLOWER TSFF
+				               WHERE TSFF.ITEM_TYPE     = 'FEED'
+				                 AND TSFF.FOLLOWER_TYPE = 'GROUP'  
+				                 AND TSFF.FOLLOWER_ID   = #{groupId}
+				  		     ) X
+				       ) A, ${defaultTablePrefix}FEED TSF
+				 WHERE A.FEED_ID =  TSF.FEED_ID
+				   AND TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+				   AND TSF.ISDELETED = 0
+	  		 	 <if test="feedId>0">
+	               AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+	             </if>
+	             <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedType)">
+				   AND FEED_TYPE = #{feedType}
+				 </if>
+	             <!-- 모바일에서는 할일 피드에 대해 달력으로 표현하지 않고 일반적인 피드 형태로 제공되어야 하기에 추가(모바일 전용 필드) -->
+	             <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(dueDate)">
+				   AND DUEDATE > 0
+				 </if>
+				 <if test="cType == 0">
+				   AND CMT_LST_REGDTTM BETWEEN STR_TO_DATE(CONCAT(#{startDate} , '0000'), '%Y-%m-%d%H%i')
+				 					AND STR_TO_DATE(CONCAT(#{endDate} , '2359'), '%Y-%m-%d%H%i')
+				 </if>
+				 ORDER BY TSF.CMT_LST_REGDTTM DESC 
+  		
+  		<choose>
+			<when test="rowNumToShow != null and rowNumToShow != ''">
+				LIMIT #{rowNumToShow}
+			</when>
+			<otherwise>LIMIT 7</otherwise>
+		</choose> 
+	  		   ) X
+	</select>
+	
+	<!-- 그룹지식 피드 아이디리스트 -->
+	<select id="selectGroupKnwldgeFeedIdList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		FROM ( 
+			SELECT 	FEED_ID 
+			FROM 	${defaultTablePrefix}FEED 
+            WHERE  	FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+            AND     ISDELETED = 0
+  		 	<if test="feedId > 0">
+            AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+            </if>
+            AND  FEED_ID IN (
+                 SELECT 	FEED_ID
+                 FROM 		${defaultTablePrefix}KNWLDG 
+                 WHERE 		GROUP_ID   = #{groupId}
+                 AND		ISAPPROVAL = 1
+            )
+            ORDER BY CMT_LST_REGDTTM DESC 
+  			LIMIT 7
+  		) X
+	</select>
+	
+	<select id="selectMemberFeedIdList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		FROM ( 
+			SELECT 	FEED_ID 
+			FROM 	${defaultTablePrefix}FEED 
+            WHERE  	FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+            AND     ISDELETED = 0
+  		 	<if test="feedId>0">
+            AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+            </if>
+            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedType)">
+			AND FEED_TYPE = #{feedType}
+			</if>
+			
+			<if test="memberId == sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'MEMBER'
+                 AND		FOLLOWER_ID   = #{memberId}
+                 )
+            </if>
+			<if test="memberId != sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	TSF1.ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER TSF1, ${defaultTablePrefix}FOLLOWER TSF2
+                 WHERE    	TSF1.ITEM_ID = TSF2.ITEM_ID
+                 AND 		TSF1.ITEM_TYPE     = 'FEED'
+                 AND 		TSF1.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF1.FOLLOWER_ID   = #{memberId}
+                 AND    	TSF2.ITEM_TYPE     = 'FEED'
+                 AND 		TSF2.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF2.FOLLOWER_ID   = #{sessionMemberId}
+                 ) 
+            </if>
+           
+           <!-- 모바일에서는 할일 피드에 대해 달력으로 표현하지 않고 일반적인 피드 형태로 제공되어야 하기에 추가(모바일 전용 필드) -->
+            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(dueDate)">
+			AND DUEDATE > 0
+			</if>
+            ORDER BY CMT_LST_REGDTTM DESC 
+  		<choose>
+			<when test="rowNumToShow != null and rowNumToShow != ''">
+				LIMIT #{rowNumToShow} 
+			</when>
+			<otherwise>LIMIT 7</otherwise>
+		</choose>
+  		) X
+	</select>
+	
+	<!-- 해쉬태그 피드 아이디리스트 -->
+	<select id="selectHashTagFeedIdList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		FROM ( 
+			SELECT 	FEED_ID 
+			FROM 	${defaultTablePrefix}FEED 
+            WHERE  	FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+            AND     ISDELETED = 0
+  		 	<if test="feedId>0">
+            AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+            </if>
+            AND  FEED_ID IN (
+                 SELECT 	FEED_ID
+                 FROM 		${defaultTablePrefix}TAG 
+                 WHERE 		TAG_NAME   = #{tagName}
+            )
+            <if test="memberId > 0">
+				<if test="memberId == sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'MEMBER'
+                 AND		FOLLOWER_ID   = #{memberId}
+                 UNION ALL
+                 SELECT 	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'GROUP'  
+                 AND		FOLLOWER_ID IN (
+		                          SELECT GROUP_ID
+		                          FROM   ${defaultTablePrefix}GRPFWL 
+		                          WHERE  MEMBER_ID = #{memberId}
+		                          AND    JOIN_STATUS = 'COMPLETE'
+		                          UNION ALL
+		                          SELECT GROUP_ID
+		                          FROM   ${defaultTablePrefix}GROUP 
+		                          WHERE  GROUP_TYPE = 'ORGANIZATION'
+		                          AND    TARGET_ID in (
+		                                            SELECT A.DEPT_ID FROM ${defaultTablePrefix}USERINFO A
+							                        WHERE A.USER_ID IN (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER 
+							                                             WHERE MEMBER_ID = #{memberId})
+		                          )
+                          )
+                 ) 
+            	</if>
+				<if test="memberId != sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	TSF1.ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER TSF1, ${defaultTablePrefix}FOLLOWER TSF2
+                 WHERE    	TSF1.ITEM_ID = TSF2.ITEM_ID
+                 AND 		TSF1.ITEM_TYPE     = 'FEED'
+                 AND 		TSF1.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF1.FOLLOWER_ID   = #{memberId}
+                 AND    	TSF2.ITEM_TYPE     = 'FEED'
+                 AND 		TSF2.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF2.FOLLOWER_ID   = #{sessionMemberId}
+                 ) 
+            	</if>
+            </if>
+            ORDER BY CMT_LST_REGDTTM DESC
+  			LIMIT 7 
+  		) X
+	</select>
+	
+	<!-- 즐겨찾기 피드 아이디리스트 -->
+	<select id="selectBookmarkFeedIdList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedIdList">
+		SELECT FEED_ID
+		FROM ( 
+			SELECT 	FEED_ID 
+			FROM 	${defaultTablePrefix}FEED 
+            WHERE  	FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+            AND     ISDELETED = 0
+  		 	<if test="feedId>0">
+            AND <![CDATA[ CMT_LST_REGDTTM < (SELECT CMT_LST_REGDTTM FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})  ]]>	
+            </if>
+            AND  FEED_ID IN (
+                 SELECT 	FEED_ID
+                 FROM 		${defaultTablePrefix}BOOKMARK 
+                 WHERE 		MEMBER_ID   = #{memberId}
+            )
+            ORDER BY CMT_LST_REGDTTM DESC
+  			LIMIT 7 
+  		) X
+	</select>
+	
+	<select id="selectFeedList" parameterType="map" resultMap="resultFeedList">
+		SELECT 
+			   TSF.FEED_ID            
+			 , TSF.FEED_TYPE          
+			 , TSF.FEED_TITLE         
+			 , TSF.FEED_CONTENTS      
+			 , TSF.P_FEED_ID
+			 , TSF.P_MEMBER_ID       
+			 , TSF.REG_MEMBER_ID      
+			 , TSF.CONTENTS_TYPE
+			 , TSF.APPROVAL_STATUS      
+			 , TSF.CMT_LST_SEC_FEED_ID
+			 , TSF.LIKEIT_CNT         
+			 , TSF.CMT_CNT            
+			 , TSF.SHARE_CNT
+			 , TSF.TENANT_ID
+			 , TSF.DUEDATE
+			 , TSF.ENDDATE
+			 , TSF.REGDTTM
+			 , TSF.TENANT_FEED_ID
+			 , 
+			 <choose>
+			   <when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			   <otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			 </choose>
+			 , TSM.MEMBER_ID
+	         , TSM.SYNC_KEY
+			 , TSM.MEMBER_THUMB_URL
+			 , TST.TENANT_NAME
+			 , TST.NETWORK_API_URL
+			 , TST.NETWORK_AUTH_IP
+			 , TST.NETWORK_AUTH_TOKEN
+			 , TSF.INF_ID
+			 , IFNULL(( SELECT ISPUBLIC FROM ${defaultTablePrefix}GROUP 
+			          WHERE GROUP_TYPE != 'ORGANIZATION' 
+			            AND GROUP_ID = (SELECT FOLLOWER_ID FROM ${defaultTablePrefix}FOLLOWER
+                                         WHERE ITEM_ID = TSF.FEED_ID AND FOLLOWER_TYPE = 'GROUP' AND ITEM_TYPE = 'FEED' LIMIT 1) ), 0) AS ISPUBLIC
+			 , TSFF.IS_FOLLOW AS IS_FOLLOW
+			 , IFNULL(TSFF.FOLLOWER_CNT, 0) AS FOLLOWER_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}ATTACHFILE TSA WHERE TSA.FEED_ID = TSF.FEED_ID) AS FILE_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}TAG TST WHERE TST.FEED_ID = TSF.FEED_ID) AS TAG_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}KNWLDG TSK WHERE TSK.FEED_ID = TSF.FEED_ID) AS KNWLDG_CNT
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	INNER JOIN ${defaultTablePrefix}MEMBER  TSM ON TSM.MEMBER_ID = TSF.REG_MEMBER_ID
+        	INNER JOIN ${defaultTablePrefix}TENANT  TST ON TST.TENANT_ID = TSF.TENANT_ID
+	        LEFT JOIN (
+	          SELECT ITEM_ID
+	               , CASE WHEN SUM(CASE WHEN FOLLOWER_TYPE = 'MEMBER' AND FOLLOWER_ID = 1 THEN 1 ELSE 0 END) = 0 THEN 0 ELSE 1 END AS IS_FOLLOW
+	               , COUNT(*) AS FOLLOWER_CNT 
+	            FROM ${defaultTablePrefix}FOLLOWER
+	           WHERE ITEM_ID IN
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			        #{item}
+			  	</foreach>
+			  	 AND ITEM_TYPE = 'FEED'
+	           GROUP BY ITEM_ID
+	        ) TSFF ON TSF.FEED_ID = TSFF.ITEM_ID
+        WHERE TSF.FEED_ID IN 
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+		        #{item}
+		  	</foreach>
+		AND TSF.ISDELETED = 0  	
+		ORDER BY TSF.CMT_LST_REGDTTM DESC 
+	</select>
+	
+	<select id="selectFeedCommentList" parameterType="map" resultMap="resultFeedCommentList">
+		SELECT 
+		       TSF.FEED_ID            
+		     , TSF.FEED_TYPE          
+		     , TSF.FEED_TITLE         
+		     , TSF.FEED_CONTENTS      
+		     , TSF.P_FEED_ID
+			 , (SELECT 
+			 	<choose>
+			 	<when test="lang == 'en'">TSMM.MEMBER_NAME_EN AS P_MEMBER_NAME</when>
+			 	<otherwise>TSMM.MEMBER_NAME AS P_MEMBER_NAME</otherwise>
+			 	</choose>
+			 	 FROM ${defaultTablePrefix}MEMBER TSMM WHERE TSMM.MEMBER_ID  = TSF.P_MEMBER_ID
+			   ) AS P_MEMBER_NAME
+		     , TSF.P_MEMBER_ID
+		     , TSF.REG_MEMBER_ID          
+		     , TSF.CONTENTS_TYPE      
+		     , TSF.CMT_LST_SEC_FEED_ID
+		     , TSF.LIKEIT_CNT         
+		     , TSF.CMT_CNT
+		     , TSF.REGDTTM          
+		     , TSF.SHARE_CNT
+			 ,
+			 <choose>
+			   <when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			   <otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			 </choose>
+		     , TSM.MEMBER_ID
+		     , TSM.SYNC_KEY
+		     , TSM.MEMBER_THUMB_URL  
+		     , 
+			 <choose>
+			   <when test="lang == 'en'">U.POSITION_NAME_EN AS MEMBER_POSITION_NAME</when>
+			   <otherwise>U.POSITION_NAME AS MEMBER_POSITION_NAME</otherwise>
+			 </choose>
+		     , (SELECT COUNT(*) FROM ${defaultTablePrefix}ATTACHFILE TSA WHERE TSA.FEED_ID = TSF.FEED_ID) AS FILE_CNT
+		  FROM (SELECT TSF.FEED_ID
+		          FROM ${defaultTablePrefix}FEED TSF
+		         WHERE TSF.P_FEED_ID = #{feedId}
+		           AND TSF.FEED_TYPE = 'COMMENT'
+		           AND TSF.ISDELETED = 0
+		       ) A
+		     , ${defaultTablePrefix}FEED TSF
+		     , ${defaultTablePrefix}MEMBER TSM
+		     , ${defaultTablePrefix}USERINFO U
+		 WHERE A.FEED_ID = TSF.FEED_ID
+		   AND TSF.REG_MEMBER_ID = TSM.MEMBER_ID
+		   AND U.USER_ID  = TSM.SYNC_KEY
+		   <if test="cmtCmpntType == 1">
+	 	   AND <![CDATA[ TSF.FEED_PER_SEQ <= 2  ]]>
+	  	   </if>
+	 	   <if test="cmtCmpntType == 0">
+		   AND <![CDATA[TSF.FEED_PER_SEQ > 2  ]]>
+	 	   </if>
+	 	   <if test="cmtCmpntType == 2">
+		   AND <![CDATA[TSF.FEED_ID >= #{cmtLstSecFeedId}  ]]>
+	 	   </if>
+	 	   <if test="cmtCmpntType == 3">
+		   AND <![CDATA[TSF.FEED_ID < #{cmtLstSecFeedId}  ]]>
+	 	   </if>
+	</select>
+	
+	<select id="selectCommentListByRegDttm" parameterType="map" resultMap="resultFeedCommentList">
+		SELECT 
+			 TSF.FEED_ID            
+			,TSF.FEED_TYPE          
+			,TSF.FEED_TITLE         
+			,TSF.FEED_CONTENTS      
+			,TSF.P_FEED_ID
+			,TSF.P_MEMBER_ID 
+			, (SELECT 
+				<choose>
+				<when test="lang == 'en'">TSMM.MEMBER_NAME_EN AS P_MEMBER_NAME</when>
+				<otherwise>TSMM.MEMBER_NAME AS P_MEMBER_NAME</otherwise>
+				</choose>
+				 FROM ${defaultTablePrefix}MEMBER TSMM WHERE TSMM.MEMBER_ID  = TSF.P_MEMBER_ID
+			  ) AS P_MEMBER_NAME
+			,TSF.REG_MEMBER_ID          
+			,TSF.CONTENTS_TYPE      
+			,TSF.CMT_LST_SEC_FEED_ID
+			,TSF.LIKEIT_CNT         
+			,TSF.CMT_CNT
+			,TSF.REGDTTM
+			,TSL.REG_MEMBER_ID AS LIKEIT_MEMBER_ID          
+			,TSF.SHARE_CNT
+			,
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose>
+			,TSM.MEMBER_ID
+			,TSM.SYNC_KEY
+			,TSM.MEMBER_THUMB_URL 	AS MEMBER_THUMB_URL
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.FULL_DEPT_NAME_EN</when>
+			<otherwise>U.FULL_DEPT_NAME</otherwise>
+			</choose> AS MEMBER_PART_NAME
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS MEMBER_POSITION_NAME
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS MEMBER_DUTY_NAME
+			,TSA.FILE_ID
+			,TSA.FILE_NAME
+			,TSA.FILE_CONTENT_TYPE
+			,TSA.FILE_EXT
+			,TSA.FILE_URL
+			,TSA.THUMB_FILE_NAME
+			,TSA.MBL_THUMB_FILE_NAME
+			,TSA.REPOSITORY_TYPE
+			,TSA.ISTRANSFER
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	LEFT JOIN ${defaultTablePrefix}MEMBER 		  TSM  ON TSM.MEMBER_ID   = TSF.REG_MEMBER_ID
+        	LEFT JOIN ${defaultTablePrefix}ATTACHFILE    TSA  ON TSA.FEED_ID     = TSF.FEED_ID
+        	LEFT JOIN ${defaultTablePrefix}LIKEIT  	  TSL  ON TSL.FEED_ID 	  = TSF.FEED_ID
+        	LEFT OUTER JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+        WHERE TSF.P_FEED_ID = #{pFeedId}
+        AND   TSF.FEED_TYPE = 'COMMENT'
+        AND   TSF.ISDELETED = 0
+        AND   <![CDATA[  TSF.REGDTTM > #{regDttm} ]]>
+        ORDER BY TSF.REGDTTM 
+	</select>
+	
+	<select id="selectFeedCommentListByLimit" parameterType="map" resultMap="resultFeedCommentList">
+		SELECT 
+			 TSF.FEED_ID            
+			,TSF.FEED_TYPE          
+			,TSF.FEED_TITLE         
+			,TSF.FEED_CONTENTS      
+			,TSF.P_FEED_ID
+			,TSF.P_MEMBER_ID
+			, (SELECT 
+				<choose>
+				<when test="lang == 'en'">TSMM.MEMBER_NAME_EN AS P_MEMBER_NAME</when>
+				<otherwise>TSMM.MEMBER_NAME AS P_MEMBER_NAME</otherwise>
+				</choose>
+				 FROM ${defaultTablePrefix}MEMBER TSMM WHERE TSMM.MEMBER_ID  = TSF.P_MEMBER_ID
+			  ) AS P_MEMBER_NAME
+			,TSF.REG_MEMBER_ID          
+			,TSF.CONTENTS_TYPE      
+			,TSF.CMT_LST_SEC_FEED_ID
+			,TSF.LIKEIT_CNT         
+			,TSF.CMT_CNT
+			,TSF.REGDTTM
+			,TSL.REG_MEMBER_ID AS LIKEIT_MEMBER_ID          
+			,TSF.SHARE_CNT
+			,
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose>
+			,TSM.MEMBER_ID
+	        , TSM.SYNC_KEY
+			,TSM.MEMBER_THUMB_URL 	AS MEMBER_THUMB_URL
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.FULL_DEPT_NAME_EN</when>
+			<otherwise>U.FULL_DEPT_NAME</otherwise>
+			</choose> AS MEMBER_PART_NAME
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS MEMBER_POSITION_NAME
+		    , 
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS MEMBER_DUTY_NAME
+			,TSA.FILE_ID
+			,TSA.FILE_NAME
+			,TSA.FILE_CONTENT_TYPE
+			,TSA.FILE_EXT
+			,TSA.FILE_URL
+			,TSA.THUMB_FILE_NAME
+			,TSA.MBL_THUMB_FILE_NAME
+			,TSA.REPOSITORY_TYPE
+			,TSA.ISTRANSFER
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	LEFT JOIN ${defaultTablePrefix}MEMBER 		  TSM  ON TSM.MEMBER_ID   = TSF.REG_MEMBER_ID
+        	LEFT JOIN ${defaultTablePrefix}ATTACHFILE    TSA  ON TSA.FEED_ID     = TSF.FEED_ID
+        	LEFT JOIN ${defaultTablePrefix}LIKEIT  	  TSL  ON TSL.FEED_ID 	  = TSF.FEED_ID 
+        	LEFT OUTER JOIN ${defaultTablePrefix}USERINFO U ON U.USER_ID = TSM.SYNC_KEY
+        WHERE TSF.P_FEED_ID = #{feedId}
+        AND   TSF.FEED_TYPE = 'COMMENT'
+        AND   TSF.ISDELETED = 0
+        <if test="limit != null and limit != 0">
+        	AND   <![CDATA[ TSF.FEED_PER_SEQ <= #{limit} ]]>
+        </if>
+        ORDER BY TSF.FEED_PER_SEQ DESC, TSF.REGDTTM
+	</select>
+	
+	<select id="selectFeedFollowerList" parameterType="map" resultMap="resultFeedFollowerList">
+		SELECT  
+			 TSFF.ITEM_ID        AS ITEM_ID
+		    ,TSFF.ITEM_TYPE      AS ITEM_TYPE
+		    ,TSFF.FOLLOWER_ID    AS FOLLOWER_ID
+		    ,TSG.GROUP_NAME 	 AS FOLLOWER_NAME
+		    ,TSFF.FOLLOWER_TYPE  AS FOLLOWER_TYPE 
+		    , ''                 AS SYNC_KEY
+		    , TSG.ISPUBLIC       AS ISPUBLIC
+			FROM ${defaultTablePrefix}FOLLOWER TSFF, 
+				 ${defaultTablePrefix}GROUP TSG  
+			WHERE TSFF.FOLLOWER_ID 	 = TSG.GROUP_ID
+			  AND TSFF.ITEM_TYPE 	 = 'FEED'
+			  AND TSFF.FOLLOWER_TYPE = 'GROUP'
+			  AND TSFF.ITEM_ID 		 = #{feedId}
+        
+        UNION ALL
+        SELECT  
+			 TSF.ITEM_ID       	AS ITEM_ID
+		    ,TSF.ITEM_TYPE     	AS ITEM_TYPE
+		    ,TSF.FOLLOWER_ID   	AS FOLLOWER_ID
+		    ,
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS FOLLOWER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS FOLLOWER_NAME</otherwise>
+			</choose>
+		    ,TSF.FOLLOWER_TYPE  AS FOLLOWER_TYPE 
+		    ,TSM.SYNC_KEY       AS SYNC_KEY
+		    , 0                 AS ISPUBLIC
+			FROM ${defaultTablePrefix}FOLLOWER TSF, 
+				 ${defaultTablePrefix}MEMBER TSM 
+			WHERE TSF.FOLLOWER_ID   = TSM.MEMBER_ID
+			  AND TSF.ITEM_TYPE 	= 'FEED'
+			  AND TSF.FOLLOWER_TYPE = 'MEMBER'			
+			  AND TSF.ITEM_ID 		= #{feedId}
+		LIMIT 10 
+	</select>
+	
+	<select id="selectFeedTagList" parameterType="org.uengine.sns.feed.vo.FeedVo" resultMap="resultFeedTagList">
+		SELECT
+		      FEED_ID
+		     ,TAG_NAME
+		FROM ${defaultTablePrefix}TAG 
+		WHERE  FEED_ID = #{feedId}
+		ORDER BY REGDTTM
+	</select>
+	
+	<select id="selectFeedFileList" parameterType="org.uengine.sns.feed.vo.FeedVo" resultMap="resultFeedFileList">
+		SELECT
+		     FILE_ID
+			,FILE_NAME
+			,FILE_CONTENT_TYPE
+			,FILE_EXT
+			,FILE_URL
+			,THUMB_FILE_NAME
+			,MBL_THUMB_FILE_NAME
+			,REPOSITORY_TYPE
+			,ISTRANSFER
+			,FEED_ID
+		FROM ${defaultTablePrefix}ATTACHFILE 
+		WHERE  FEED_ID = #{feedId}
+		ORDER BY FILE_ID
+	</select>
+	
+	<select id="selectFeedIdAtMemberFeed" parameterType="map" resultType="long">
+        SELECT ITEM_ID
+        FROM 	${defaultTablePrefix}FOLLOWER 
+        WHERE 	ITEM_TYPE     = 'FEED'
+        AND    ITEM_ID       = #{feedId}
+        AND 	FOLLOWER_TYPE = 'MEMBER'
+        AND	FOLLOWER_ID   = #{memberId}
+        UNION ALL
+        SELECT ITEM_ID
+        FROM   ${defaultTablePrefix}FOLLOWER TSF, ${defaultTablePrefix}GROUP TSG
+        WHERE 	TSF.ITEM_TYPE     = 'FEED'
+        AND    TSF.ITEM_ID       = #{feedId}
+        AND    TSF.FOLLOWER_TYPE = 'GROUP'
+        AND    TSF.FOLLOWER_ID   = TSG.GROUP_ID
+        AND    TSG.ISPUBLIC      = 1
+        UNION ALL
+        SELECT ITEM_ID
+        FROM 	${defaultTablePrefix}FOLLOWER 
+        WHERE 	ITEM_TYPE     = 'FEED'
+        AND    ITEM_ID       = #{feedId}
+        AND 	FOLLOWER_TYPE = 'GROUP'  
+        AND	FOLLOWER_ID IN (
+                   SELECT GROUP_ID
+                   FROM   ${defaultTablePrefix}GRPFWL 
+                   WHERE  MEMBER_ID = #{memberId}
+                   AND    JOIN_STATUS = 'COMPLETE'
+                   UNION ALL
+                   SELECT GROUP_ID
+                   FROM   ${defaultTablePrefix}GROUP 
+                   WHERE  GROUP_TYPE = 'ORGANIZATION'
+                   AND    TARGET_ID in (
+                                     SELECT A.DEPT_ID FROM ${defaultTablePrefix}USERINFO A
+                                      WHERE A.USER_ID IN (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER TSM 
+                                                           WHERE TSM.MEMBER_ID = #{memberId} )
+                   )
+                 )
+	</select>
+	
+	<!-- FEED 상세조회 -->
+	<select id="selectGetFeed" parameterType="map" resultMap="resultFeedList">
+		SELECT 
+			   TSF.FEED_ID            
+			 , TSF.FEED_TYPE          
+			 , TSF.FEED_TITLE         
+			 , TSF.FEED_CONTENTS      
+			 , TSF.P_FEED_ID
+			 , TSF.P_MEMBER_ID
+			 , TSF.REG_MEMBER_ID          
+			 , TSF.CONTENTS_TYPE      
+			 , TSF.CMT_LST_SEC_FEED_ID
+			 , TSF.LIKEIT_CNT
+			 , TSF.DUEDATE
+			 , TSF.ENDDATE   
+			 , TSF.REGDTTM        
+			 , TSF.CMT_CNT            
+			 , TSF.SHARE_CNT
+			 , TSF.TENANT_ID
+			 , TSF.TENANT_FEED_ID
+			 , TSF.APPROVAL_STATUS
+			 , TSF.INF_ID
+			 , TSF.ISDELETED
+			 , TSM.MEMBER_ID
+			 , 
+			 <choose>
+			   <when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			   <otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			 </choose>
+	         , TSM.SYNC_KEY
+			 , TSM.MEMBER_THUMB_URL
+			 , TST.TENANT_NAME
+			 , TST.NETWORK_API_URL
+			 , TST.NETWORK_AUTH_IP
+			 , TST.NETWORK_AUTH_TOKEN
+			 , TSFF.IS_FOLLOW AS IS_FOLLOW
+			 , IFNULL(( SELECT ISPUBLIC FROM ${defaultTablePrefix}GROUP 
+			          WHERE GROUP_TYPE != 'ORGANIZATION' 
+			            AND GROUP_ID = (SELECT FOLLOWER_ID FROM ${defaultTablePrefix}FOLLOWER
+                                         WHERE ITEM_ID = TSF.FEED_ID AND FOLLOWER_TYPE = 'GROUP' AND ITEM_TYPE = 'FEED' LIMIT 1) ), 0) AS ISPUBLIC
+			 , IFNULL(TSFF.FOLLOWER_CNT, 0) AS FOLLOWER_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}ATTACHFILE TSA WHERE TSA.FEED_ID = TSF.FEED_ID) AS FILE_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}TAG TST WHERE TST.FEED_ID = TSF.FEED_ID) AS TAG_CNT
+			 , (SELECT COUNT(*) FROM ${defaultTablePrefix}KNWLDG TSK WHERE TSK.FEED_ID = TSF.FEED_ID) AS KNWLDG_CNT
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	LEFT JOIN ${defaultTablePrefix}MEMBER 	TSM ON TSM.MEMBER_ID   = TSF.REG_MEMBER_ID
+        	LEFT JOIN ${defaultTablePrefix}TENANT  TST ON TST.TENANT_ID   = TSF.TENANT_ID
+	        LEFT JOIN (
+	          SELECT ITEM_ID
+	               , CASE WHEN SUM(CASE WHEN FOLLOWER_TYPE = 'MEMBER' AND FOLLOWER_ID = 1 THEN 1 ELSE 0 END) = 0 THEN 0 ELSE 1 END AS IS_FOLLOW
+	               , COUNT(*) AS FOLLOWER_CNT 
+	            FROM ${defaultTablePrefix}FOLLOWER
+	           WHERE ITEM_ID = #{feedId}
+	           GROUP BY ITEM_ID
+	        ) TSFF ON TSF.FEED_ID = TSFF.ITEM_ID
+        WHERE TSF.FEED_ID = #{feedId}
+	</select>
+	
+	<!-- FEED 상세조회 with inf_id -->
+	<select id="selectGetFeedWithInf" parameterType="map" resultMap="resultFeedList">
+		SELECT 
+			 TSF.FEED_ID            
+			,TSF.FEED_TYPE          
+			,TSF.FEED_TITLE         
+			,TSF.FEED_CONTENTS      
+			,TSF.P_FEED_ID
+			,TSF.P_MEMBER_ID
+			,TSF.REG_MEMBER_ID          
+			,TSF.CONTENTS_TYPE      
+			,TSF.CMT_LST_SEC_FEED_ID
+			,TSF.LIKEIT_CNT
+			,TSF.DUEDATE
+			,TSF.ENDDATE   
+			,TSF.REGDTTM        
+			,TSF.CMT_CNT            
+			,TSF.SHARE_CNT
+			,TSF.TENANT_ID
+			,TSF.TENANT_FEED_ID
+			,TSM.MEMBER_ID
+			,
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose>
+	        , TSM.SYNC_KEY
+			,TSM.MEMBER_THUMB_URL
+			,TST.TENANT_NAME
+			,TST.NETWORK_API_URL
+			,TST.NETWORK_AUTH_IP
+			,TST.NETWORK_AUTH_TOKEN
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	INNER JOIN ${defaultTablePrefix}MEMBER TSM ON TSM.MEMBER_ID = TSF.REG_MEMBER_ID
+        	INNER JOIN ${defaultTablePrefix}TENANT  TST ON TST.TENANT_ID   = TSF.TENANT_ID
+        WHERE TSF.INF_ID = #{infId}
+	</select>
+	
+	<select id="selectCommentFeedIdList" parameterType="long" resultMap="resultCommentFeedIdList">
+		SELECT FEED_ID
+		FROM ${defaultTablePrefix}FEED  TSF
+		WHERE P_FEED_ID = #{feedId}
+		  AND ISDELETED = 0
+		  AND FEED_TYPE = 'COMMENT'
+		ORDER BY FEED_ID
+	</select>
+	
+	<select id="selectTomorrowToDoFeedList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedList">
+		SELECT
+		 	TSF.FEED_ID            
+			,TSF.FEED_TYPE          
+			,TSF.FEED_TITLE         
+			,TSF.FEED_CONTENTS      
+			,TSF.P_FEED_ID
+			,TSF.P_MEMBER_ID
+			,TSF.REG_MEMBER_ID          
+			,TSF.CONTENTS_TYPE      
+			,TSF.CMT_LST_SEC_FEED_ID
+			,TSF.LIKEIT_CNT
+			,TSF.DUEDATE
+			,TSF.ENDDATE   
+			,TSF.REGDTTM        
+			,TSF.CMT_CNT            
+			,TSF.SHARE_CNT
+			,TSF.TENANT_ID
+			,TSF.TENANT_FEED_ID
+			,TSF.APPROVAL_STATUS
+			,TSF.INF_ID
+		FROM ${defaultTablePrefix}FEED TSF
+		WHERE
+		TSF.DUEDATE > 0
+		AND TSF.DUEDATE = DATE_FORMAT(date_add(now(), interval +1 day), '%Y%m%d')
+		AND TSF.ISDELETED = '0'
+	</select>
+	
+	<select id="selectToDoFeedList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultTodoFeedList">
+    	SELECT 
+		       TSF.FEED_ID
+		     , TSF.FEED_TITLE
+		     , TSF.DUEDATE
+		     , CASE WHEN TSF.CNT = 1 THEN 2                                           
+		            WHEN TSF.CNT > 1 AND TSF.REG_MEMBER_ID = #{memberId} THEN 2                  
+		            WHEN TSF.CNT > 1 AND TSF.REG_MEMBER_ID != #{memberId} THEN 3                 
+		        END AS TODO_TYPE     
+		  FROM (
+		        SELECT B.FEED_ID
+		             , B.FEED_TITLE
+		             , B.DUEDATE
+		             , B.REG_MEMBER_ID
+		             , (SELECT COUNT(*) AS CNT
+		                  FROM ${defaultTablePrefix}FOLLOWER F
+		                 WHERE F.ITEM_ID = B.FEED_ID
+		                   AND F.ITEM_TYPE = 'FEED'
+		                   AND F.FOLLOWER_TYPE = #{followerType, jdbcType=VARCHAR}
+		               ) AS CNT
+		          FROM (SELECT 
+		                         TSF.FEED_ID
+		                       , TSF.DUEDATE
+		                  FROM ${defaultTablePrefix}FEED TSF, ${defaultTablePrefix}FOLLOWER TSFF
+		                 WHERE TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+		                   AND TSF.ENDDATE IS NULL 
+		                   AND TSF.ISDELETED = 0
+                           AND TSF.FEED_ID = TSFF.ITEM_ID
+                           AND TSFF.ITEM_TYPE = 'FEED'
+		                   AND TSFF.FOLLOWER_TYPE = #{followerType, jdbcType=VARCHAR}
+		                   AND TSFF.FOLLOWER_ID = #{memberId}
+                         <![CDATA[
+		                   AND TSF.DUEDATE < DATE_FORMAT(NOW() + 7, '%Y%m%d')
+		                   AND TSF.DUEDATE > ''
+                          ]]>
+		                 ORDER BY DUEDATE DESC
+		                 LIMIT 5
+		               ) A
+		               , ${defaultTablePrefix}FEED B
+		         WHERE A.FEED_ID = B.FEED_ID
+		       ) TSF
+	</select>
+	
+	<select id="selectGroupToDoFeedList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultTodoFeedList">
+		SELECT 
+	       FEED_ID 
+	      ,FEED_TITLE
+	      ,DUEDATE
+	      ,CASE REG_MEMBER_ID WHEN #{memberId} THEN 1 ELSE 0 END AS TODO_TYPE
+	    FROM (
+	          SELECT *
+	          FROM ${defaultTablePrefix}FEED
+	          WHERE DUEDATE > 0
+	          AND  ENDDATE IS NULL
+	          AND  ISDELETED = 0
+	          AND  FEED_ID IN (
+	                 SELECT  	ITEM_ID
+	                 FROM 		${defaultTablePrefix}FOLLOWER 
+	                 WHERE 		ITEM_TYPE     = 'FEED'
+	                 AND 		FOLLOWER_TYPE = 'GROUP'
+	                 AND		FOLLOWER_ID   = #{groupId}
+	          )
+	          LIMIT 5 
+	    ) X
+	    ORDER BY DUEDATE
+	</select>
+	
+	<!-- Feed 등록 -->
+	<insert id="insertFeed" parameterType="org.uengine.sns.feed.vo.FeedVo" >
+		INSERT INTO ${defaultTablePrefix}FEED (
+        	FEED_TITLE, P_FEED_ID, P_MEMBER_ID, FEED_TYPE, 
+        	FEED_CONTENTS, REGDTTM, CMT_LST_REGDTTM, DUEDATE, REG_MEMBER_ID, TENANT_ID, TENANT_FEED_ID,
+        	INF_ID, FEED_PER_SEQ
+        ) VALUES (
+          	#{feedTitle, 		jdbcType=VARCHAR}, 
+          	#{pFeedId},
+          	#{pMemberId},	
+          	#{feedType, 		jdbcType=VARCHAR}, 
+          	#{feedContents, 	jdbcType=VARCHAR}, 
+          	#{regDttm}, 
+          	#{cmtLstRegDttm,	jdbcType=TIMESTAMP}, 
+          	#{dueDate, 			jdbcType=VARCHAR},	
+          	#{regMemberId}, 
+          	#{tenantId}, 
+          	#{tenantFeedId},
+          	#{infId, 			jdbcType=VARCHAR},
+          	#{feedPerSeq}
+        )
+		<selectKey keyProperty="feedId" resultType="long" order="AFTER">
+			SELECT last_insert_id()
+		</selectKey>
+	</insert>
+
+	<!-- Feed 수정 -->
+	<update id="updateFeed" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED SET FEED_TITLE=#{feedTitle} WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- Feed 수정 -->
+	<update id="updateFeedByComment" parameterType="org.uengine.sns.feed.vo.FeedVo">
+    	UPDATE ${defaultTablePrefix}FEED 
+    	SET 
+    		CMT_LST_SEC_FEED_ID = #{cmtLstSecFeedId}, 
+    		CMT_LST_REGDTTM = #{cmtLstRegDttm}, 
+    		CMT_CNT = IFNULL(CMT_CNT, 0) + 1
+    	WHERE FEED_ID = #{feedId}
+	</update>
+
+	<!-- 댓글 삭제시 부모Feed 카운트 줄이기 -->
+	<update id="disMountCommentCountParentFeed" parameterType="long">
+    	UPDATE ${defaultTablePrefix}FEED 
+    	   SET CMT_CNT = CMT_CNT - 1
+    	WHERE FEED_ID = #{feedId}
+	</update>	
+	
+	<!-- Feed 삭제 -->
+	<update id="deleteFeed" parameterType="long">
+		UPDATE ${defaultTablePrefix}FEED 
+		   SET ISDELETED = 1 
+		WHERE FEED_ID = #{feedId}
+	</update>
+	
+	<!-- 할일 Feed 완료처리 -->
+	<update id="completeToDoFeed" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED SET ENDDATE=#{endDate}, COMP_MEMBER_ID=#{compMemberId} WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- 할일 Feed 미완료처리 -->
+	<update id="incompleteToDoFeed" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED SET ENDDATE=null, COMP_MEMBER_ID=#{compMemberId} WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- 할일 Feed 만기일자 변경-->
+	<update id="setFeedDueDate" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED SET DUEDATE=#{dueDate} WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- 좋아요 카운트 +1 -->
+	<update id="updateFeedLikeCntPlus" parameterType="long">
+		UPDATE ${defaultTablePrefix}FEED  
+		   SET LIKEIT_CNT = (SELECT LIKEIT_CNT+1 FROM ${defaultTablePrefix}FEED  WHERE FEED_ID = #{feedId}) 
+		WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- 좋아요를 클릭시 부모피드 cmt_lst_regDttm업데이트 -->
+	<update id="updateFeedCmtLstRegDttm" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED  
+		   SET CMT_LST_REGDTTM = #{cmtLstRegDttm} 
+		WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<!-- 좋아요 카운트 -1 -->
+	<update id="updateFeedLikeCntMinus" parameterType="long">
+		UPDATE ${defaultTablePrefix}FEED  
+		   SET LIKEIT_CNT = (SELECT LIKEIT_CNT-1 FROM ${defaultTablePrefix}FEED  WHERE FEED_ID = #{feedId}) 
+		WHERE FEED_ID = #{feedId}
+	</update>
+	   
+	<!-- Feed 공유 카운트 업데이트 -->
+	<update id="updateShareCnt" parameterType="long">
+		UPDATE ${defaultTablePrefix}FEED 
+		   SET SHARE_CNT = IFNULL(SHARE_CNT, 0) + 1 
+		WHERE FEED_ID = #{feedId}
+	</update>
+	
+	<select id="selectAllSystemFeedList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="resultFeedList">
+		SELECT 
+			 TSF.FEED_ID            
+			, TSF.FEED_TYPE          
+			, TSF.FEED_TITLE         
+			, TSF.FEED_CONTENTS      
+			, TSF.P_FEED_ID          
+			, TSF.CONTENTS_TYPE      
+			, TSF.CMT_LST_SEC_FEED_ID
+			, TSF.LIKEIT_CNT         
+			, TSF.CMT_CNT            
+			, TSF.SHARE_CNT
+			, TSF.TENANT_ID
+			, TSF.TENANT_FEED_ID
+			, TSM.MEMBER_NAME
+			, TSM.MEMBER_THUMB_URL
+			, TST.TENANT_NAME
+			, TST.NETWORK_API_URL
+			, TST.NETWORK_AUTH_IP
+			, TST.NETWORK_AUTH_TOKEN
+        FROM  ${defaultTablePrefix}FEED TSF 
+        	LEFT JOIN ${defaultTablePrefix}MEMBER 	TSM ON TSM.MEMBER_ID   = TSF.REG_MEMBER_ID 
+        	LEFT JOIN ${defaultTablePrefix}TENANT  TST ON TST.TENANT_ID   = TSF.TENANT_ID 
+        ORDER BY TSF.FEED_ID DESC
+	</select>
+	
+	<select id="selectFeedCalendarList" parameterType="org.uengine.sns.feed.vo.CalendarVo" resultMap="resultCalendarList">
+		SELECT
+			 FEED_ID
+			, SUBSTRING(FEED_TITLE, 0, ${subTtlLimit}) TITLE
+			, FEED_TITLE REAL_TITLE
+			, DUEDATE
+			, ENDDATE 
+			, REG_MEMBER_ID
+			<if test="processingColor != null and processingColor != ''">      
+			, #{processingColor} PROCESSINGCOLOR
+			</if>
+			<if test="notCompleteColor != null and notCompleteColor != ''">      
+			, #{notCompleteColor} NOTCOMPLETECOLOR
+			</if>
+			<if test="completeColor != null and completeColor != ''">      
+			, #{completeColor} COMPLETECOLOR
+			</if>
+		FROM (
+			SELECT
+			 FEED_ID
+			, FEED_TITLE
+			, DUEDATE
+			, ENDDATE
+			, REG_MEMBER_ID
+			FROM ${defaultTablePrefix}FEED
+			WHERE 1 = 1
+			AND DUEDATE > 0
+			AND FEED_TYPE = 'GENERAL'
+			<if test=" type == 'GROUP' ">
+			AND  FEED_ID IN (
+	                 SELECT  	ITEM_ID
+	                 FROM 		${defaultTablePrefix}FOLLOWER 
+	                 WHERE 		ITEM_TYPE     = 'FEED'
+	                 AND 		FOLLOWER_TYPE = 'GROUP'
+	                 AND		FOLLOWER_ID   = #{memberId}
+	            )
+	        </if>
+	        <if test=" type == 'MEMBER' ">
+				<if test="memberId == sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'MEMBER'
+                 AND		FOLLOWER_ID   = #{memberId}
+                 UNION ALL
+                 SELECT 	ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER 
+                 WHERE 		ITEM_TYPE     = 'FEED'
+                 AND 		FOLLOWER_TYPE = 'GROUP'  
+                 AND		FOLLOWER_ID IN (
+                          SELECT GROUP_ID
+                          FROM   ${defaultTablePrefix}GRPFWL 
+                          WHERE  MEMBER_ID = #{memberId}
+                          AND    JOIN_STATUS = 'COMPLETE'
+                 ) 
+                 
+            )
+            	</if>
+				<if test="memberId != sessionMemberId">
+            AND  FEED_ID IN (
+                 SELECT  	TSF1.ITEM_ID
+                 FROM 		${defaultTablePrefix}FOLLOWER TSF1, ${defaultTablePrefix}FOLLOWER TSF2
+                 WHERE    	TSF1.ITEM_ID = TSF2.ITEM_ID
+                 AND 		TSF1.ITEM_TYPE     = 'FEED'
+                 AND 		TSF1.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF1.FOLLOWER_ID   = #{memberId}
+                 AND    	TSF2.ITEM_TYPE     = 'FEED'
+                 AND 		TSF2.FOLLOWER_TYPE = 'MEMBER'
+                 AND		TSF2.FOLLOWER_ID   = #{sessionMemberId}
+            )
+            	</if>
+			</if>
+			AND DUEDATE BETWEEN #{startDay} AND #{endDay}
+			) X
+			ORDER BY FEED_ID
+	</select>
+	
+	<!-- 결재완료처리 -->	
+	<update id="approvalComplete" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE ${defaultTablePrefix}FEED 
+		   SET APPROVAL_STATUS=#{approvalStatus} 
+		WHERE FEED_ID = #{feedId}
+	</update>
+    
+	<update id="updateCommentFeedPerSeq" parameterType="long">
+		UPDATE ${defaultTablePrefix}FEED
+		   SET FEED_PER_SEQ = FEED_PER_SEQ + 1
+		WHERE P_FEED_ID = #{value}
+		  AND FEED_TYPE = 'COMMENT'
+	</update>
+	
+	<update id="updateCommentFeedPerSeqByDelete" parameterType="map">
+		UPDATE ${defaultTablePrefix}FEED
+		   SET FEED_PER_SEQ = FEED_PER_SEQ - 1
+		WHERE P_FEED_ID = #{pFeedId}
+		  AND FEED_TYPE = 'COMMENT'
+		  AND FEED_PER_SEQ >= (SELECT FEED_PER_SEQ FROM ${defaultTablePrefix}FEED WHERE FEED_ID = #{feedId})
+	</update>
+    
+	<select id="selectFeedForFeedDownload" parameterType="hashmap" resultType="hashmap">
+   		SELECT F.FEED_ID, F.P_FEED_ID, F.FEED_PER_SEQ
+	    , F.FEED_TITLE, F.REG_MEMBER_ID, DATE_FORMAT(F.REGDTTM, '%Y-%m-%d %T') REGDTTM
+	    , TSM.MEMBER_NAME
+	        , (SELECT WMSYS.WM_CONCAT(TSM.MEMBER_NAME) 
+	                FROM ${defaultTablePrefix}FOLLOWER TSF, ${defaultTablePrefix}MEMBER TSM
+	                WHERE TSF.ITEM_TYPE = 'FEED' AND TSF.ITEM_ID = F.FEED_ID
+	                AND TSF.FOLLOWER_TYPE = 'MEMBER'
+	                AND TSF.FOLLOWER_ID = TSM.MEMBER_ID
+	                AND TSF.FOLLOWER_ID != F.REG_MEMBER_ID
+	          ) MEMBERFOLLOWLIST
+	    FROM
+			    (
+				        SELECT TSF.FEED_ID AS FEED_ID, TSF.FEED_ID AS P_FEED_ID, TSF.FEED_PER_SEQ
+				        , TSF.FEED_TITLE, TSF.REG_MEMBER_ID, TSF.REGDTTM
+				        FROM ${defaultTablePrefix}FEED TSF
+				        WHERE 1=1
+				        	AND TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+				        	AND     TSF.ISDELETED = 0
+				            AND  TSF.FEED_ID IN (
+				                                 SELECT     ITEM_ID
+				                                 FROM         ${defaultTablePrefix}FOLLOWER 
+				                                 WHERE         ITEM_TYPE     = 'FEED'
+				                                 AND         FOLLOWER_TYPE = 'GROUP'  
+				                                 AND        FOLLOWER_ID   = #{groupId}
+				                            )
+				            <if test="cType == 0">
+								AND TSF.CMT_LST_REGDTTM BETWEEN STR_TO_DATE(CONCAT(#{startDate} , '0000'), '%Y-%m-%d%H%i')
+												AND STR_TO_DATE(CONCAT(#{endDate} , '2359'), '%Y-%m-%d%H%i')
+							</if>  
+				        UNION ALL
+				        
+				        SELECT TSF2.FEED_ID AS FEED_ID, TSF2.P_FEED_ID AS P_FEED_ID, TSF2.FEED_PER_SEQ
+				        , TSF2.FEED_TITLE, TSF2.REG_MEMBER_ID, TSF2.REGDTTM
+				        FROM ${defaultTablePrefix}FEED TSF INNER JOIN ${defaultTablePrefix}FEED TSF2 ON TSF.FEED_ID = TSF2.P_FEED_ID
+				            AND TSF2.FEED_TYPE = 'COMMENT'
+				        WHERE 1=1
+					        AND TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+					        AND     TSF.ISDELETED = 0
+					                AND  TSF.FEED_ID IN (
+					                                 SELECT     ITEM_ID
+					                                 FROM         ${defaultTablePrefix}FOLLOWER 
+					                                 WHERE         ITEM_TYPE     = 'FEED'
+					                                 AND         FOLLOWER_TYPE = 'GROUP'  
+					                                 AND        FOLLOWER_ID   = #{groupId}
+					                            )
+					        <if test="cType == 0">
+								AND TSF.CMT_LST_REGDTTM BETWEEN STR_TO_DATE(CONCAT(#{startDate} , '0000'), '%Y-%m-%d%H%i')
+												AND STR_TO_DATE(CONCAT(#{endDate} , '2359'), '%Y-%m-%d%H%i')
+							</if>
+				) F, ${defaultTablePrefix}MEMBER TSM
+		WHERE F.REG_MEMBER_ID = TSM.MEMBER_ID
+		ORDER BY P_FEED_ID DESC, FEED_PER_SEQ
+	</select>
+	
+	<insert id="insertFeedHistory" parameterType="map">
+		INSERT INTO ${defaultTablePrefix}FEED_HISTORY
+		(
+			FEED_ID
+		  , SEQ
+		  , FEED_TITLE
+		  , MODIFY_DTTM
+		  , MODIFY_MEMBER_ID
+		)
+		(
+		SELECT 
+			   FEED_ID
+			 , IFNULL((SELECT MAX(SEQ) FROM TB_SW_FEED_HISTORY WHERE FEED_ID = #{feedId}), 0)+1
+			 , FEED_TITLE
+			 , now()
+			 , ${modifyMemberId}
+		  FROM ${defaultTablePrefix}FEED
+		 WHERE FEED_ID = #{feedId}
+		)
+	</insert>
+
+</mapper>

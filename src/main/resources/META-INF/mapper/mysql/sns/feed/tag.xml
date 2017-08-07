@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.TagMapper">
+
+	<resultMap id="tagResultMap" type="org.uengine.sns.feed.vo.TagVo">
+		<result property="tagName" 		column="TAG_NAME"/>
+		<result property="feedId" 		column="FEED_ID"/>
+		<result property="regMemberId" 	column="REG_MEMBER_ID"/>
+		<result property="regDttm" 		column="REGDTTM"/>
+	</resultMap>
+	
+	<resultMap id="tagCloudResultMap" type="org.uengine.sns.feed.vo.TagCloudVo">
+		<result property="tagName" 	column="TAG_NAME"/>
+		<result property="tagCount"	column="TAG_COUNT"/>
+		<result property="tagType" 	column="TAG_TYPE"/>
+	</resultMap>
+	
+	<!-- 피드별 TAG 조회 -->
+	<select id="selectTagList" parameterType="string" resultMap="tagResultMap">
+		SELECT 
+		   TUT.TAG_NAME
+		  ,TUT.FEED_ID
+		  ,TUT.REG_MEMBER_ID
+		  ,TUT.REGDTTM
+		FROM ${defaultTablePrefix}TAG TUT
+		WHERE TUT.FEED_ID = #{feedId}
+	</select>
+	
+	<select id="selectTagCloudList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="tagCloudResultMap">
+		SELECT 
+		      TAG_NAME
+		     ,TAG_COUNT
+		     ,TAG_TYPE
+		FROM  ${defaultTablePrefix}TAGCLOUD
+		WHERE TAG_TYPE = #{tagType, jdbcType=VARCHAR}
+		ORDER BY TAG_COUNT DESC
+		LIMIT 20
+	</select>
+	
+	<select id="selectTagCountList" resultMap="tagCloudResultMap">
+		SELECT 
+			 TAG_NAME, 
+			 TAG_COUNT
+			FROM (
+				  SELECT 
+				    TAG_NAME, COUNT(*) TAG_COUNT
+				  FROM ${defaultTablePrefix}TAG 
+				  GROUP BY TAG_NAME 
+				  ORDER BY TAG_COUNT DESC
+				  LIMIT 10
+				) X
+	</select>
+	
+	<select id="selectTagCountListByMemberId" parameterType="long" resultMap="tagCloudResultMap">
+		SELECT *
+		  FROM (
+				SELECT 
+				       T.TAG_NAME, COUNT(*) AS TAG_COUNT
+				  FROM (
+				        SELECT  
+				               DISTINCT
+				               A.ITEM_ID
+				          FROM (
+				               SELECT 
+				                      TST.FEED_ID AS ITEM_ID
+				                 FROM ${defaultTablePrefix}TAG TST
+				                WHERE TST.REG_MEMBER_ID   = #{targetMemberId}
+				               UNION ALL
+				               SELECT  
+				                      TSFF.ITEM_ID
+				                 FROM ${defaultTablePrefix}GRPFWL TSGF
+				                    , ${defaultTablePrefix}FOLLOWER TSFF
+				                WHERE TSGF.GROUP_ID      = TSFF.FOLLOWER_ID
+				                  AND TSFF.ITEM_TYPE     = 'FEED'
+				                  AND TSFF.FOLLOWER_TYPE = 'GROUP'  
+				                  AND TSGF.MEMBER_ID     = #{targetMemberId}
+				                  AND TSGF.JOIN_STATUS   = 'COMPLETE'
+				               UNION ALL
+				               SELECT 
+				                      TSFF.ITEM_ID
+				                 FROM (SELECT DISTINCT
+				                            A.DEPT_ID
+				                         FROM ${defaultTablePrefix}USERINFO A
+				                        WHERE A.USER_ID IN (SELECT SYNC_KEY FROM ${defaultTablePrefix}MEMBER 
+							                       			 WHERE MEMBER_ID = #{targetMemberId})
+				                       ) A
+				                     , ${defaultTablePrefix}GROUP TSG
+				                     , ${defaultTablePrefix}FOLLOWER TSFF
+				                WHERE A.DEPT_ID = TSG.TARGET_ID
+				                  AND TSG.GROUP_ID = TSFF.FOLLOWER_ID
+				                  AND TSFF.ITEM_TYPE     = 'FEED'
+				                  AND TSFF.FOLLOWER_TYPE = 'GROUP'   
+				                  AND TSG.GROUP_TYPE     = 'ORGANIZATION'
+				               ) A
+				       ) A
+				       , ${defaultTablePrefix}FEED TSF
+					   , ${defaultTablePrefix}TAG T
+				   WHERE A.ITEM_ID =  TSF.FEED_ID
+				     AND TSF.FEED_ID = T.FEED_ID
+				     AND TSF.ISDELETED = 0
+		      GROUP BY T.TAG_NAME
+		      ORDER BY COUNT(*) DESC
+			  LIMIT 10
+		    ) X
+	</select>
+	
+	<!-- TAG 등록 -->
+	<insert id="insertTag" parameterType="org.uengine.sns.feed.vo.TagVo" >
+        INSERT INTO ${defaultTablePrefix}TAG 
+        	(
+        	 TAG_NAME,   
+        	 FEED_ID,   
+        	 REG_MEMBER_ID ,  
+        	 REGDTTM 
+        	 ) 
+			VALUES
+			(
+			 #{tagName, jdbcType=VARCHAR}, 
+			 #{feedId}, 
+			 #{regMemberId},  
+			 now()
+			)
+	</insert>
+	
+	<!-- TAG 삭제 -->
+	<delete id="deleteTag" parameterType="org.uengine.sns.feed.vo.TagVo">
+		DELETE FROM ${defaultTablePrefix}TAG 
+		WHERE TAG_NAME = #{tagName} 
+		  AND FEED_ID = #{feedId}
+	</delete>
+
+</mapper>

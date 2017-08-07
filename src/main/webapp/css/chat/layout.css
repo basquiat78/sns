@@ -1,0 +1,165 @@
+@charset "UTF-8";
+@import url('reset.css');
+
+
+html, body {height:100%; overflow:hidden;
+	min-width:360px; /* 전체레이아웃 최소 가로사이즈 : 360px */
+}
+#wrap {width:100%; height:100%; border:1px solid #354d7b; padding-top:96px;}
+#header {position:fixed; width:100%; top:0; z-index:10; border-bottom:1px solid #17355f; background-color:#517da6;}
+#content {overflow-y:scroll; height:100%;}
+#content:after {content:''; height:80px; display:block;}
+.container {margin:0 15px; position:relative;}
+
+
+/* TopArea - GNB */
+#gnb, #unb, #unb-room {background-color:#517da6;}
+
+#gnb {height:40px; border-bottom:1px solid #7497b8;}
+#gnb h1 {padding-top:13px;} /* logo */
+#gnb h1 span {display:inline-block; text-indent:-8000px; width:132px; height:15px;}
+
+#gnb .quick_button {right:0; top:13px; position:absolute;} /* btn - 최소화, 최대화, 화면닫기 */
+#gnb .quick_button span {display:inline-block; text-indent:-8000px; margin-left:7px;}
+#gnb .quick_button span a {display:block; width:13px; height:13px;}
+#gnb .quick_button span:nth-child(1) a {background-position: 0 -30px;}
+#gnb .quick_button span:nth-child(2) a {background-position: -30px -30px;}
+#gnb .quick_button span:nth-child(3) a, #gnb .quick_button span.close a {background-position: -60px -30px;}
+#gnb .quick_button span a:hover {background-position-y:-60px;}
+
+/* TopArea - UNB */
+#unb {border-top:1px solid #336797; color:#FFF;}
+#unb strong {font-size:16px;display:block;margin-top: 18px;margin-bottom: 18px;} /* unb - title */
+
+#unb .msg {position:absolute; background-color:#41719e; border-top:1px solid #1e568c; border-left:1px solid #1e568c; right:0; top:43px;} /* unb > msg */
+#unb .msg span {display:inline-block; padding:9px 15px 8px 20px; font-size:13px; font-weight:bold;}
+#unb .msg span:before {width:17px; height:14px; content:''; display:inline-block; vertical-align:middle; margin-right:5px; background:url(../../images/chat/common.png) 0 -90px no-repeat;}
+#unb .msg span.end:before {background-position:-30px -90px;}
+
+#unb .user_list a, #unb .chat_list a {width:31px; height:32px; display:inline-block; vertical-align:middle; text-indent:-8000px;} /* unb > icon */
+#unb .user_list a {background-position:0 -120px; margin-right:30px;}
+#unb .chat_list a {background-position:-60px -120px;}
+#unb .user_list a:hover, #unb .chat_list a:hover, #unb .user_list a.on, #unb .chat_list a.on {background-position-y: -180px;}
+
+/* Botton Area >  button */
+#bnb {position:fixed; bottom:20px; text-align:center; width:100%;}
+#bnb button {
+	border:1px solid #6a89a5; background-color:#7c9dbc; cursor:pointer; color:#FFF; font-weight:bold; font-size:16px; line-height:40px; height:40px;
+	min-width:176px; display:relative;
+}
+#bnb button.end:before, #bnb button.success:before, #bnb button.broken:before {
+	content:''; background:url(../../images/chat/common.png) 0 -240px; width:14px; height:18px; display:inline-block; margin-right:6px; vertical-align:middle;
+}
+#bnb button:hover {background-color:#698cac;}
+
+
+
+/* content - 회원리스트 */
+.msg-user dt, .msg-user dd {padding:0 15px;}
+.msg-user dt {height:39px; line-height:39px; border-bottom:1px solid #e0e0e0; background-color:#f5f5f5; font-weight:bold; color:#626262;}
+#content  dl > dd {padding-left:83px; position:relative; height:69px; border-bottom:1px solid #d1d1d1; cursor:pointer; padding-right:156px;}
+#content dl > dd:hover {background-color:#f0f9ff;}
+#content dl span {display:block; padding-top:27px; font-weight:bold; font-size:14px;}
+
+#content dl .photo {width:52px; height:52px; border:1px solid #e5e5e5; position:absolute; left:15px; top:50%; margin-top:-26px;
+	background:50% no-repeat; background-image:url(../../images/chat/photos/photo_normal.gif);
+	background-size:cover; border-radius:50%; -moz-border-radius:50%; -webkit-border-radius:50%; text-align:center; text-indent:-8000px;
+
+}
+
+
+/* content - 대화목록 */
+#content dl.msg-chat dd .photo {text-indent:0px;}
+
+.msg-chat .photo {overflow:hidden;} /* 사진설정 */
+.msg-chat .photo ul {letter-spacing:-4px;}
+.msg-chat .photo_num2 li, .msg-chat .photo_num3 li, .msg-chat .photo_num4 li { /* 대화상대수에 따른 사진 이미지 설정 */
+	width:25px; height:26px; display:inline-block; vertical-align:middle;
+	background-size:cover; background-color:#efefef; background-image:url(../../images/chat/photos/photo_normal.gif);
+}
+.msg-chat .photo li u {display:none;}
+.msg-chat .photo_num2 li {height:52px; background-size:cover; background-position:top center;}
+.msg-chat .photo_num3 li:nth-child(1) {width:100%; background-position:100% 50%;}
+
+.msg-chat .user {padding-top:17px;} /* 대화방 간략내용 */
+.msg-chat .user div:nth-child(1) {font-weight:bold; padding-bottom:10px; font-size:14px; line-height:100%;}
+.msg-chat .user div:nth-child(1) u {border:1px solid #d0d0d0; background-color:#f1f1f1; text-decoration:none; font-size:11px; padding:2px 4px; vertical-align:bottom; color:#7b7b7b;}
+.msg-chat .user div:nth-child(2) {color:#7b7b7b;}
+.msg-user dd .msg {
+	position:absolute; top:50%; right:15px; margin-top:-11px; padding:6px 15px 4px; border-radius:5px;
+	background-color:#f5f5f5; color:#666; letter-spacing:-1px; border:1px solid #ececec;
+}
+.msg-user dd .msg strong {color:#596d81;}
+.msg-chat .time {position:absolute; top:14px; right:15px; color:#7b7b7b;}
+
+
+
+/* Chatting Room Area */
+#room #wrap {padding-top:96px;}
+#room #content {background-color:#404652; color:#ffffff;}
+#room #content:after {height:150px;} /* 채팅룸 - 스크롤 하단 간격 */
+
+#unb-room {position:relative;}
+#unb-room strong {font-size:16px; display:block; color:#ffffff; padding:19px 0;} /* unb - title */
+#unb-room .room_btn {position:absolute; top:12px; right:0;}
+#unb-room .room_btn span {display:inline-block; text-indent:-8000px;}
+#unb-room .room_btn span a {display:block; background:url(../../images/chat/common.png) 0 -270px no-repeat; width:31px; height:31px;}
+#unb-room .room_btn span a:hover {background-position-y:-330px;}
+#unb-room .room_btn span:nth-child(2) a {background-position-x:-60px;}
+
+/* 채팅룸 - 상단버튼 : 대화상대 추가, 대화상대 리스트 */
+body#room #bnb {background-color:#FFFFFF; bottom:0; height:130px;}
+body#room #bnb dl dt {text-align:left; padding:10px 0; border-bottom:1px solid #d4d4d4;}
+body#room #bnb dl dt input {height:40px; border:0; width:100%;}
+body#room #bnb dl dd {padding:15px 0;}
+body#room #bnb button.success:before {background-position-x:-30px;}
+body#room #bnb button.broken:before {background-position-x:-60px;}
+
+
+/* 채팅룸 - 대화내용 */
+.chat_admission {text-align:center; padding:25px 0; color:#a5a5a5; font-weight:bold;} /* 채팅룸 - 초대인원 text */
+.chat_msg {text-align:center; padding-bottom:12px; font-weight:bold;} /* 채팅룸 - 공개 메세지 */
+.chatting_list li {min-height:80px;}
+
+/* 채팅룸 - 상대방 채팅 */
+.chatting_list .their {position:relative; padding-left:65px;}
+.chatting_list .their .photo {width:52px; height:52px; border:1px solid #e5e5e5; position:absolute; left:0; top:0;
+	background:50% no-repeat; background-image:url(../../images/chat/photos/photo_normal.gif);
+	background-size:cover; border-radius:50%; -moz-border-radius:50%; -webkit-border-radius:50%; text-align:center; text-indent:-8000px;
+}
+.chatting_list .their .txt_name {font-weight:bold; padding-top:8px;}
+.chatting_list .their .txt_msg {display:inline-block; height:35px; background-color:#ffffff; color:#000333; padding:10px;}
+.chatting_list .their .txt_data {display:inline-block; vertical-align:bottom;}
+.chatting_list .box_their {
+	display:inline-block; position:relative; min-height:34px; margin-top:8px; margin-left:10px; padding:10px 15px; padding-top:12px; color:#000333; background-color:#FFFFFF;
+	border-radius:30px; border-top-left-radius:0; border-bottom-left-radius:24px;
+}
+.chatting_list .box_their:before {content:''; width:10px; height:20px; display:block; position:absolute; top:0; left:-10px; background: url(../../images/chat/bl_msg_their.png) no-repeat;}
+
+/* 채팅룸 -  나의 채팅 */
+.chatting_list li.me {min-height:65px;}
+.chatting_list .me {text-align:right;}
+.chatting_list .me .txt_data {display:inline-block; vertical-align:bottom; padding-right:10px;}
+.chatting_list .me .box_me {
+	display:inline-block; position:relative; min-height:34px; margin-top:8px; margin-right:10px; padding:10px 15px; padding-top:12px; color:#ffffff; background-color:#50a4f3;
+	border-radius:30px; border-top-right-radius:0; border-bottom-right-radius:24px; text-align:left;
+}
+.chatting_list .me .box_me:before {content:''; width:10px; height:20px; display:block; position:absolute; top:0; right:-10px; background: url(../../images/chat/bl_msg_me.png) no-repeat;}
+.chat_day {text-align:center; padding:30px 0; color:#a5a5a5; font-weight:bold; background:url(../../images/chat/bl_chat_line.gif) left center repeat-x; margin:0 15px;}
+.chat_day span {margin:0 auto; background-color:#404652; padding:0 10px;}
+
+.chatting_list .txt_data {color:#a5a5a5; font-size:11px; margin-top:5px; padding-left:10px;}
+
+/* 채팅룸 - 대화상대 초대, 리스트 */
+.room_add {position:absolute; width:320px; height:100%; border:1px solid #f2f2f2; top:0; right:0; z-index:20; background-color:#fff; color:#333333;}
+.room_add .add_title {height:39px; background-color:#404652; color:#fff; font-weight:bold; position:relative;}
+.room_add .add_title .title {text-align:center; display:block; line-height:40px;}
+.room_add .add_title .close {position:absolute; left:15px; top:50%; margin-top:-7px;}
+.room_add .add_title .close a {width:13px; height:13px; background:url(../../images/chat/common.png) -60px -30px no-repeat; text-indent:-8000px; display:block;}
+.room_add .add_title .close a:hover {background-position-y:-60px;}
+.room_add .add_title .btn {position:absolute; right:15px; top:50%; margin-top:-11px;}
+.room_add .add_title .btn a {color:#ffffff; text-align:center; width:43px; height:22px; line-height:22px; display:block; border-radius:3px; background-color:#7c9dbc;}
+.room_add .add_title .btn a:hover {background-color:#698cac;}
+
+.room_add dd {padding-right:;}
+.room_add .check {position:absolute; top:50%; right:15px; margin-top:-7px;}

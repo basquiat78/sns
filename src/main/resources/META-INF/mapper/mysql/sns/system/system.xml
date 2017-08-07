@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.system.mapper.SystemMapper">
+	
+	<!-- 한 페이지내에 볼 피드 아이디  -->
+	<resultMap  id="resultSystemFeedIdList" type="java.lang.Long">
+		<id property="feedId"	column="FEED_ID" />
+	</resultMap>
+	
+	<resultMap id="resultSystemGroupList" type="org.uengine.sns.group.vo.GroupVo">
+		<id property="groupId" 		 		column="GROUP_ID"/>
+		<result property="groupName" 	 	column="GROUP_NAME"/>
+		<result property="groupImgUrl" 		column="GROUP_IMG_URL"/>
+		<result property="groupType"   		column="GROUP_TYPE"/>
+		<result property="pGroupId" 	 	column="P_GROUP_ID"/>
+		<result property="description" 		column="DESCRIPTION"/>
+		<result property="isPublic"    		column="ISPUBLIC"/>
+		<result property="isAutoJoin"  		column="ISAUTOJOIN"/>
+		<result property="isDeleted" 	 	column="ISDELETED"/>
+		<result property="targetId" 	 	column="TARGET_ID"/>
+		<result property="targetType"  		column="TARGET_TYPE"/>
+		<result property="tenantId"    		column="TENANT_ID"/>
+		<result property="regDttm"     		column="REGDTTM"/>
+		<result property="regMemberId" 		column="REG_MEMBER_ID"/>
+		<result property="memberCnt" 		column="MEMBERCNT"/>
+		<result property="regMemberName"	column="MEMBER_NAME"/>
+	</resultMap>
+	
+	<resultMap id="resultSystemCompanyList" type="org.uengine.sns.system.vo.SystemVo">
+		<result property="companyId" 		column="COMPANY_ID"/>
+		<result property="companyName"		column="COMPANY_NAME"/>
+		<result property="companyNameEn"	column="COMPANY_NAME_EN"/>
+	</resultMap>
+	
+	<select id="selectSystemFeedList" parameterType="org.uengine.sns.system.vo.SystemVo" resultMap="resultSystemFeedIdList">
+		SELECT 
+			 FEED_ID
+			FROM ( 
+				 SELECT
+				 	  FEED_ID 
+				 	 FROM 	${defaultTablePrefix}FEED 
+	             	 WHERE FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+		  		 	 <if test="feedId > 0">
+		               AND <![CDATA[ FEED_ID < #{feedId}  ]]>	
+		             </if>
+		             <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedType)">
+					   AND FEED_TYPE = #{feedType}
+					 </if>
+					 <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(feedTitle)">
+					   AND FEED_TITLE = #{feedTitle}
+					 </if>
+					 <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(regDttm)">
+					   AND DATE_FORMAT(REGDTTM,'%Y-%m-%d') = #{regDttm}
+					 </if>
+		             <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(regMemberName)">
+					   AND REG_MEMBER_ID IN (
+					 	SELECT MEMBER_ID FROM ${defaultTablePrefix}MEMBER WHERE MEMBER_NAME LIKE CONCAT('%',#{regMemberName},'%') 
+					 )
+	            	 </if>
+	            ORDER BY FEED_ID DESC
+	  			LIMIT 7 
+	  		) X
+	</select>
+	
+	<select id="selectSystemGroupList" parameterType="org.uengine.sns.system.vo.SystemVo" resultMap="resultSystemGroupList">
+		SELECT *
+		FROM (
+			SELECT 
+			    GROUP_ID,    	<!-- 그룹 아이디 -->
+				GROUP_NAME,    	<!-- 그룹명 -->
+				GROUP_IMG_URL, 	<!-- 그룹 이미지 -->
+				GROUP_TYPE,		<!-- 그룹 타입(0:내부, 1:외부) -->
+				P_GROUP_ID,    	<!-- 상위 그룹 아이디 -->
+				DESCRIPTION, 	<!-- 그룹 설명 -->
+				ISPUBLIC,    	<!-- 공개 여부 -->
+				ISAUTOJOIN,  	<!-- 자동가입 여부 -->
+				ISDELETED,   	<!-- 삭제 여부 -->
+				TARGET_ID,   	<!-- 외부타겟 아이디 -->
+				TARGET_TYPE, 	<!-- 외부타겟 타입 -->
+				TENANT_ID,    	<!-- 테넌트 아이디 -->
+				REGDTTM,		<!-- 등록 일시 -->
+				REG_MEMBER_ID   <!-- 등록자 아이디 -->
+			FROM ${defaultTablePrefix}GROUP 
+			WHERE ISDELETED = 0 
+			<if test="groupId > 0">
+            AND <![CDATA[ GROUP_ID < #{groupId}  ]]>	
+            </if>
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupName)">
+			AND   UPPER(GROUP_NAME) LIKE CONCAT('%',UPPER(#{groupName}),'%') escape '|'
+			</if>
+			<if test="groupType != '999'">
+			AND   GROUP_TYPE = #{groupType}
+			</if>
+			<if test="isPublic != 999">
+			AND   ISPUBLIC = #{isPublic}
+			</if>
+			<if test="isAutoJoin != 999">
+			AND   ISAUTOJOIN = #{isAutoJoin}
+			</if>
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(regMemberName)">
+			AND REG_MEMBER_ID IN (
+				SELECT MEMBER_ID FROM ${defaultTablePrefix}MEMBER WHERE MEMBER_NAME LIKE CONCAT('%',#{regMemberName},'%') 
+			)
+            </if>
+            <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(regDttm)">
+			AND DATE_FORMAT(REGDTTM,'%Y-%m-%d') = #{regDttm}
+			</if>
+			ORDER BY GROUP_ID DESC
+			LIMIT 20
+		) X
+	</select>
+	
+	<select id="selectSystemCompanyList" resultMap="resultSystemCompanyList">
+		SELECT 
+			'1' AS COMPANY_ID, 
+			'유엔진' AS COMPANY_NAME, 
+			'UENGINE' AS COMPANY_NAME_EN 
+	</select>
+	
+</mapper>

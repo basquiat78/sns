@@ -1,0 +1,46 @@
+@charset "utf-8";
+/* CSS Document */
+/*
+body {
+	scrollbar-3dlight-color:gold;
+    scrollbar-arrow-color:rgba(255, 153, 0, 1);
+    scrollbar-base-color:;
+    scrollbar-darkshadow-color:blue;
+    scrollbar-face-color:rgba(255, 153, 0, 1);
+    scrollbar-highlight-color:;
+    scrollbar-shadow-color:;
+}
+*/
+/* Chrome, Safari용 스크롤 바 */
+/*
+::-webkit-scrollbar {width: 8px; height: 8px; border: 3px solid #f5f5f5; }
+::-webkit-scrollbar-button:start:decrement, ::-webkit-scrollbar-button:end:increment {display: block; height: 10px; background: url('../images/bg.png') #f5f5f5}
+::-webkit-scrollbar-track {background: #f5f5f5; -webkit-border-radius: 10px; border-radius:10px; -webkit-box-shadow: inset 0 0 4px rgba(0,0,0)}
+::-webkit-scrollbar-thumb {height: 50px; width: 50px; background: rgba(0,0,0); -webkit-border-radius: 8px; border-radius: 8px; -webkit-box-shadow: inset 0 0 4px rgba(0,0,0)}
+*/    
+/* 
+.rightarea_wrap {min-width:339px; width:100%; overflow:auto; overflow-x:hidden; height:1200px; } 
+*/
+/* 
+.lay-snb {width:240px;float:left;padding:0 19px;border-left:1px solid #e0e0e0;border-right:1px solid #e0e0e0;box-sizing:border-box;background-color:#f5f5f5;
+overflow:auto; overflow-x:hidden; height:1200px;}
+ */
+ /*
+.lay-contents-area {border-top:1px solid #e0e0e0; overflow:auto; overflow-x:hidden; height:1200px;}
+*/
+ /*
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(255,0,0,0.8); 
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(255,0,0,0.4); 
+}*/

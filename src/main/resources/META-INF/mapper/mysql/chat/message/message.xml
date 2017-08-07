@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.chat.message.mapper.MessageMapper">
+	
+	<!-- message resultMap -->
+	<resultMap id="messageListResultMap" type="org.uengine.sns.chat.message.vo.MessageVo">
+		<id property="messageId" 		column="MESSAGE_ID"/>
+		<result property="roomId" 		column="ROOM_ID"/>
+		<result property="userId"		column="USER_ID"/>
+		<result property="userName"		column="USER_NAME"/>
+		<result property="messageType"	column="MESSAGE_TYPE"/>
+		<result property="message"		column="MESSAGE"/>
+		<result property="whisperId"	column="WHISPER_ID"/>
+		<result property="whisperName"	column="WHISPER_NAME"/>
+		<result property="regDttm"		column="REGDTTM"/>
+	</resultMap>
+	
+	<!-- 읽음 여부 resultMap -->
+	<resultMap id="messageReadListResultMap" type="org.uengine.sns.chat.message.vo.MessageVo">
+		<result property="roomId" 		column="ROOM_ID"/>
+		<result property="userId"		column="USER_ID"/>
+		<result property="messageCount"	column="MESSAGE_COUNT"/>
+		<result property="regDttm"		column="REGDTTM"/>
+		<result property="modDttm"		column="MODDTTM"/>
+	</resultMap>
+	
+	<!-- 메세지 생성 -->	
+	<insert id="insertMessage" parameterType="org.uengine.sns.chat.message.vo.MessageVo">
+		INSERT INTO	${defaultTablePrefix}CHAT_MESSAGE
+		(
+		 ROOM_ID,		<!-- 방 아이디 -->	
+		 USER_ID,		<!-- 사용자 아이디  -->
+		 USER_NAME,		<!-- 사용자 이름 -->
+		 MESSAGE_TYPE,	<!-- 메세지 타입 -->
+		 MESSAGE,		<!-- 메세지 -->
+		 WHISPER_ID,	<!-- 귓속말 대상 아이디  -->
+		 WHISPER_NAME, 	<!-- 귓속말 대상 이름 -->
+		 REGDTTM		<!-- 방 생성 일시 -->
+        ) 
+        
+        VALUES
+        (
+         #{roomId,		jdbcType=BIGINT},	   
+         #{userId, 		jdbcType=VARCHAR},
+         #{userName,	jdbcType=VARCHAR},
+         #{messageType,	jdbcType=VARCHAR},      
+         #{message,		jdbcType=VARCHAR},
+         #{whisperId, 	jdbcType=VARCHAR},
+         #{whisperName,	jdbcType=VARCHAR},
+ 		 now() 	
+ 		 )
+ 		<selectKey keyProperty="messageId" resultType="long" order="AFTER">
+        	SELECT last_insert_id()
+        </selectKey>
+    </insert>
+    
+    <!-- userId가 포함된 room list 조회 -->
+	<select id="selectMessageByRoomId" parameterType="map" resultMap="messageListResultMap">
+		SELECT
+			 MESSAGE_ID,	<!-- 아이디 -->
+			 ROOM_ID,		<!-- 방 아이디 -->	
+			 USER_ID,		<!-- 사용자 아이디  -->
+			 USER_NAME,		<!-- 사용자 이름 -->
+			 MESSAGE_TYPE,	<!-- 메세지 타입 -->
+			 MESSAGE,		<!-- 메세지 -->
+			 WHISPER_ID,	<!-- 귓속말 대상 아이디  -->
+			 WHISPER_NAME,	<!-- 귓속말 대상 이름 -->
+			 REGDTTM		<!-- 메세지 생성 일시 -->
+			FROM ${defaultTablePrefix}CHAT_MESSAGE
+			WHERE ROOM_ID = #{roomId}
+			  AND (WHISPER_ID IS NULL OR (WHISPER_ID=#{userId} or USER_ID=#{userId}) )
+	</select>
+	
+    <!-- 메세지 읽음 여부 -->	
+	<insert id="insertMessageRead" parameterType="org.uengine.sns.chat.message.vo.MessageReadVo">
+		INSERT INTO	${defaultTablePrefix}CHAT_READ
+		(
+		 ROOM_ID,		<!-- 방 아이디 -->	
+		 USER_ID,		<!-- 사용자 아이디  -->
+		 MESSAGE_COUNT,	<!-- 읽지 않은 메세지 카운트 -->
+		 REGDTTM,		<!-- 등록일 -->
+		 MODDTTM		<!-- 수정일 -->
+        ) 
+        
+        VALUES
+        (
+         #{roomId,	jdbcType=BIGINT},	   
+         #{userId,	jdbcType=VARCHAR},
+         1,
+         now(),
+         now()
+ 		 )
+    </insert>
+    
+    <!-- 메세지 읽음 여부 갱신 -->
+    <update id="updateMessageRead" parameterType="org.uengine.sns.chat.message.vo.MessageReadVo">
+   		UPDATE ${defaultTablePrefix}CHAT_READ 
+   			SET MESSAGE_COUNT= MESSAGE_COUNT + 1,
+   				MODDTTM = now()
+   			WHERE ROOM_ID = #{roomId}
+   		  	  AND USER_ID = #{userId}
+    </update>
+	
+	<!-- 메세지 읽음 여부 가져오기 -->
+	<select id="selectMessageRead" parameterType="org.uengine.sns.chat.message.vo.MessageReadVo" resultMap="messageReadListResultMap">
+		SELECT
+			 ROOM_ID,		<!-- 방 아이디 -->	
+			 USER_ID,		<!-- 사용자 아이디  -->
+			 MESSAGE_COUNT,	<!-- 메세지 여부 카운트 -->
+			 REGDTTM,		<!-- 등록일 -->
+		 	 MODDTTM		<!-- 수정일 -->
+			FROM ${defaultTablePrefix}CHAT_READ
+			WHERE ROOM_ID = #{roomId}
+			  AND USER_ID = #{userId}
+	</select>
+	
+	<!-- 메세지 읽음 여부 삭제 -->
+	<delete id="deleteMessageRead" parameterType="org.uengine.sns.chat.message.vo.MessageReadVo">
+		DELETE FROM ${defaultTablePrefix}CHAT_READ 
+			WHERE ROOM_ID = #{roomId}
+	  	  	  AND USER_ID = #{userId}
+	</delete>
+	
+	<!-- 읽지 않은 사용자 수 가져오기 -->
+	<select id="selectUnreadMessageCount" parameterType="long" resultType="int">
+		SELECT
+			 COUNT(ROOM_ID) AS COUNT <!-- 카운트 -->
+			FROM ${defaultTablePrefix}CHAT_READ
+			WHERE ROOM_ID = #{roomId}
+	</select>
+	
+	<!-- 마지막 메세지 업데이트 -->
+    <update id="updateLastMessage" parameterType="org.uengine.sns.chat.message.vo.MessageVo">
+    	UPDATE ${defaultTablePrefix}CHAT_ROOM
+   			SET LAST_MESSAGE = #{message},
+   				LASTDTTM = now()
+   			WHERE ROOM_ID = #{roomId}
+    </update>
+    
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.group.mapper.GroupFollowerMapper">
+	
+	<!-- 그룹 resultMap -->
+	<resultMap id="groupFollowerListResultMap" type="org.uengine.sns.group.vo.GroupFollowerVo">
+		<result property="groupId" 	  		column="GROUP_ID"/>
+		<result property="memberId"  	  	column="MEMBER_ID"/>
+		<result property="memberName"	  	column="MEMBER_NAME"/>
+		<result property="newFeedCnt"   	column="NEW_FEEDCNT"/>
+		<result property="isGroupMng"   	column="ISGROUPMNG"/>
+		<result property="isInvite"     	column="ISINVITE"/>
+		<result property="invitorId"    	column="INVITOR_ID"/>
+		<result property="joinStatus"   	column="JOIN_STATUS"/>
+		<result property="lstAccessDttm"	column="LST_ACCESS_DTTM"/>
+		<collection property="memberList" 			javaType="java.util.ArrayList" resultMap="groupFollowerMemberResultMap"/>
+		<collection property="tenantMappingList"	javaType="java.util.ArrayList" resultMap="groupFollowerMappingListResultMap"/>
+	</resultMap>
+	
+	<resultMap id="groupFollowerMemberResultMap" type="org.uengine.sns.member.vo.MemberVo">
+		<result property="memberId" 	  	column="MEMBER_ID"/>
+		<result property="memberName"  		column="MEMBER_NAME"/>
+		<result property="tenantId"   		column="TENANT_ID"/>
+		<result property="isSysAdmin"   	column="ISSYSADMIN"/>
+		<result property="handPhone"     	column="HANDPHONE"/>
+		<result property="isPublic"    		column="ISPUBLIC"/>
+		<result property="memberPicUrl"   	column="MEMBER_PIC_URL"/>
+		<result property="memberThumbUrl"	column="MEMBER_THUMB_URL"/>
+		<result property="syncKey"   		column="SYNC_KEY"/>
+		<result property="emailAddr"   		column="EMAIL_ADDR"/>
+	</resultMap>
+	
+	<resultMap id="groupFollowerMappingListResultMap" type="org.uengine.sns.tenant.vo.UserTenantMappingVo">
+		<result property="partName" 	column="PART_NAME"/>
+		<result property="positionName"	column="POSITION_NAME"/>
+		<result property="dutyName" 	column="DUTY_NAME"/>
+	</resultMap>
+	
+	<!-- 조건에 의한 검색 -->
+	<select id="selectGroupFollowerListByCondition" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupFollowerListResultMap">
+		SELECT 
+		     GROUP_ID, 			<!-- 그룹 아이디 -->
+			 MEMBER_ID, 		<!-- 사용자 아이디 -->
+			 NEW_FEEDCNT, 		<!-- 새글 건수 -->
+			 ISGROUPMNG, 		<!-- 그룹 관리자 여부 -->
+			 ISINVITE, 			<!-- 초대 여부 -->
+			 INVITOR_ID, 		<!-- 초대자 아이디 -->
+			 LST_ACCESS_DTTM,
+			 JOIN_STATUS 		<!-- 가입상태 -->
+			FROM ${defaultTablePrefix}GRPFWL
+			WHERE 1=1
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupId)">
+			AND GROUP_ID = #{groupId}	 	 
+			</if>	
+			<if test="memberId > 0">
+			AND MEMBER_ID = #{memberId}
+			</if>
+			ORDER BY GROUP_ID
+	</select>
+	
+	<!-- 그룹아이디에 속한 팔로워 조회 -->
+	<select id="selectGroupFollowerById" parameterType="map" resultMap="groupFollowerListResultMap">
+	    SELECT 
+	       TSGF.GROUP_ID
+	       , TSGF.ISGROUPMNG
+	       , TSGF.JOIN_STATUS
+	       , TSGF.REGDTTM
+		   , TSM.MEMBER_ID
+		   , 
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+			</choose>
+		   ,TSM.TENANT_ID
+		   ,TSM.ISPUBLIC
+		   ,TSM.SYNC_KEY
+		   ,TSM.ISSYSADMIN
+      	   ,TSM.MEMBER_PIC_URL
+		   ,U.HANDPHONE
+		   ,U.EMAIL_ADDR
+		 	,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+			,
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS DUTY_NAME
+			,
+			<choose>
+			<when test="lang == 'en'">U.DEPT_NAME_EN</when>
+			<otherwise>U.DEPT_NAME</otherwise>
+			</choose> AS PART_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM 
+    	   , ${defaultTablePrefix}GRPFWL TSGF
+    	   , ${defaultTablePrefix}USERINFO U
+		WHERE TSGF.MEMBER_ID = TSM.MEMBER_ID
+		  AND TSM.SYNC_KEY = U.USER_ID
+		  AND TSM.ISDELETED = 0 
+      	  AND TSGF.GROUP_ID =#{groupId}
+      	  AND TSGF.JOIN_STATUS = 'COMPLETE'
+		ORDER BY TSM.MEMBER_ID
+	</select>
+	
+	<!-- 그룹아이디에 속한 팔로워 조회 -->
+	<select id="selectGroupFollower" parameterType="map" resultMap="groupFollowerListResultMap">
+		SELECT 
+		     GROUP_ID, 			<!-- 그룹 아이디 -->
+			 MEMBER_ID, 		<!-- 사용자 아이디 -->
+			 NEW_FEEDCNT, 		<!-- 새글 건수 -->
+			 ISGROUPMNG, 		<!-- 그룹 관리자 여부 -->
+			 ISINVITE, 			<!-- 초대 여부 -->
+			 INVITOR_ID, 		<!-- 초대자 아이디 -->
+			 LST_ACCESS_DTTM,
+			 JOIN_STATUS 		<!-- 가입상태 -->
+			FROM ${defaultTablePrefix}GRPFWL
+		  	WHERE GROUP_ID = #{groupId}
+			  AND MEMBER_ID = #{memberId}
+			  AND JOIN_STATUS = 'COMPLETE'
+		  LIMIT 1
+	</select>
+	
+	<!-- 그룹아이디에 속한 팔로워 조회 - 그룹정보용 -->
+	<select id="selectGroupFollowerByIdForGroupInfo" parameterType="map" resultMap="groupFollowerListResultMap">
+		SELECT 
+	        TSGF.GROUP_ID
+	        , TSGF.ISGROUPMNG
+	        , TSGF.JOIN_STATUS
+	        , TSGF.REGDTTM
+		    , TSM.MEMBER_ID
+		    , 
+		 	<choose>
+		 	<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS MEMBER_NAME</when>
+		 	<otherwise>TSM.MEMBER_NAME AS MEMBER_NAME</otherwise>
+		 	</choose>
+		    ,TSM.TENANT_ID
+		    ,TSM.ISPUBLIC
+		    ,TSM.SYNC_KEY
+		    ,TSM.ISSYSADMIN
+      	    ,TSM.MEMBER_PIC_URL
+		    ,U.HANDPHONE
+		    ,U.EMAIL_ADDR
+		 	,
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS POSITION_NAME
+			,
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS DUTY_NAME
+			,
+			<choose>
+			<when test="lang == 'en'">U.DEPT_NAME_EN</when>
+			<otherwise>U.DEPT_NAME</otherwise>
+			</choose> AS PART_NAME
+		FROM ${defaultTablePrefix}MEMBER TSM 
+    	   , ${defaultTablePrefix}GRPFWL TSGF
+    	   , ${defaultTablePrefix}USERINFO U
+		WHERE TSGF.MEMBER_ID = TSM.MEMBER_ID
+		  AND TSM.SYNC_KEY = U.USER_ID
+		  AND TSM.ISDELETED = 0 
+      	  AND TSGF.GROUP_ID =#{groupId}
+		ORDER BY TSM.MEMBER_ID
+	</select>
+	
+	<!-- GroupFollower 추가 -->	
+	<insert id="insertGroupFollower" parameterType="org.uengine.sns.group.vo.GroupFollowerVo">
+		INSERT INTO	${defaultTablePrefix}GRPFWL 
+			(
+			  GROUP_ID, 		<!-- 그룹 아이디 -->
+			  MEMBER_ID,	    <!-- 사용자 아이디 -->
+			  NEW_FEEDCNT, 		<!-- 새글 건수 -->
+			  ISGROUPMNG, 		<!-- 그룹 관리자 여부 -->
+			  ISINVITE, 		<!-- 초대 여부 -->
+			  INVITOR_ID, 		<!-- 초대자 아이디 -->
+			  JOIN_STATUS, 		<!-- 가입상태 -->
+			  REGDTTM,
+			  LST_ACCESS_DTTM
+	        ) 
+	        VALUES
+	        (
+			 #{groupId}, 
+			 #{memberId}, 
+			 0,
+			 #{isGroupMng, 	jdbcType=INTEGER}, 
+			 #{isInvite, 	jdbcType=INTEGER}, 
+			 #{invitorId, 	jdbcType=DOUBLE}, 
+			 #{joinStatus, 	jdbcType=VARCHAR},	
+			 now(),
+			 now()
+	 		 )	
+	</insert>
+    
+	<insert id="insertGroupFollowerWithMemberList" parameterType="map">
+    	INSERT INTO	${defaultTablePrefix}GRPFWL 
+			(
+			  GROUP_ID, 		<!-- 그룹 아이디 -->
+			  MEMBER_ID,	    <!-- 사용자 아이디 -->
+			  NEW_FEEDCNT, 		<!-- 새글 건수 -->
+			  ISGROUPMNG, 		<!-- 그룹 관리자 여부 -->
+			  ISINVITE, 		<!-- 초대 여부 -->
+			  INVITOR_ID, 		<!-- 초대자 아이디 -->
+			  JOIN_STATUS, 		<!-- 가입상태 -->
+			  REGDTTM,
+			  LST_ACCESS_DTTM
+	        )  VALUES 
+			<foreach item="item" index="index" collection="mrows" open="" separator="," close="">
+				( #{item.groupId}, #{item.memberId}, 0, 0, 0, 0, 'COMPLETE', now(), now() ) 
+			</foreach>
+	</insert>
+    
+	<!-- GroupFollower 갱신 -->
+	<update id="updateGroupFollower" parameterType="org.uengine.sns.group.vo.GroupFollowerVo">
+   		UPDATE ${defaultTablePrefix}GRPFWL 
+    	   SET GROUP_ID = #{groupId, jdbcType=INTEGER}
+    		<if test="newFeedCnt > 0">
+		    	,NEW_FEEDCNT = #{newFeedCnt}	 
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isGroupMng)">
+		    	,ISGROUPMNG = #{isGroupMng, jdbcType=INTEGER}	 
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isInvite)">
+		    	,ISINVITE = #{isInvite}	 	 
+		    </if>
+		    <if test="invitorId > 0">
+				,INVITOR_ID= #{invitorId} 	 
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(joinStatus)">  
+				,JOIN_STATUS= #{joinStatus}	     	 
+			</if>
+    	 WHERE GROUP_ID  = #{groupId, jdbcType=INTEGER}
+    	   AND MEMBER_ID = #{memberId}
+	</update>
+	
+	<update id="updateGroupAccessDttm" parameterType="org.uengine.sns.group.vo.GroupFollowerVo">
+    	UPDATE ${defaultTablePrefix}GRPFWL 
+    	   SET LST_ACCESS_DTTM = now()
+    	 WHERE GROUP_ID  = #{groupId}
+    	   AND MEMBER_ID = #{memberId}
+	</update>
+    
+	<update id="updateGroupRegDttmWithJoinStatus" parameterType="org.uengine.sns.group.vo.GroupFollowerVo">
+    	UPDATE ${defaultTablePrefix}GRPFWL 
+    	   SET REGDTTM = now()
+    	   , JOIN_STATUS = #{joinStatus, jdbcType=VARCHAR}
+    	 WHERE GROUP_ID  = #{groupId}
+    	   AND MEMBER_ID = #{memberId}
+	</update>
+    
+	<!-- GroupFollower 삭제 -->
+	<delete id="deleteGroupFollower" parameterType="org.uengine.sns.group.vo.GroupFollowerVo">
+    	DELETE FROM ${defaultTablePrefix}GRPFWL 
+    	WHERE GROUP_ID = #{groupId} 
+    	  AND MEMBER_ID = #{memberId}
+	</delete>
+    
+	<delete id="deleteGroupFollowerByGroupId" parameterType="long">
+   		DELETE FROM ${defaultTablePrefix}GRPFWL
+   		WHERE GROUP_ID = #{groupId}  
+	</delete>
+	
+</mapper>

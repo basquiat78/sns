@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.openapi.mapper.ExternalLinkageMapper">
+
+	<resultMap id="externalLinkageMapperVo" type="org.uengine.sns.openapi.vo.ExternalLinkageMapperVo">
+		<id property="boardId"		  		column="BOARD_ID"/>
+		<result property="boardDesc"  		column="BOARD_DESC"/>
+		<result property="boardName" 		column="BOARD_NAME"/>
+		<result property="deleteYn" 		column="DELETE_YN"/>
+		<result property="publicYn"   		column="PUBLIC_YN"/>
+		<result property="depth"  	 		column="DEPTH"/>
+		<result property="companyId" 		column="COMPANY_ID"/>
+		<result property="useLinkYn" 		column="USE_LINK_YN"/>
+		<result property="linkUrl" 			column="LINK_URL"/>
+		<result property="folderYn" 		column="FOLDER_YN"/>
+		<result property="boardType" 		column="BOARD_TYPE"/>
+		<result property="anonymousYn" 		column="ANONYMOUS_YN"/>
+		<result property="lastArticleDate"	column="LAST_ARTICLE_DATE"/>
+		<result property="childCnt" 		column="CHILD_CNT"/>
+		<result property="useRssYn"     	column="USE_RSS_YN"/>
+		<result property="followId" 		column="FOLLOW_ID"/>
+		<result property="userId"  			column="USER_ID"/>
+		<result property="parentId"  		column="PARENT_ID"/>
+	</resultMap>
+	
+	<resultMap id="externalLinkageFollowingVo" type="org.uengine.sns.openapi.vo.ExternalLinkageFollowingVo">
+		<id property="followId" 		column="FOLLOW_ID" />
+		<result property="userId"  		column="USER_ID"/>
+		<result property="boardId" 		column="BOARD_ID"/>
+		<result property="regDate" 		column="REG_DATE"/>
+		<result property="boardMode"	column="BOARD_MODE"/>
+		<result property="boardName"	column="BOARD_NAME" />
+	</resultMap>
+	
+	<select id="selectCurrMemberInfo" parameterType="string" resultType="hashmap">
+		SELECT 
+			 TSM.SYNC_KEY, 
+			 TST.COMPANY_ID
+			FROM ${defaultTablePrefix}MEMBER TSM 
+			 INNER JOIN ${defaultTablePrefix}TENANT TST ON TSM.TENANT_ID = TST.TENANT_ID
+			WHERE 1=1
+			  AND TSM.MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectExtMappingList" parameterType="org.uengine.sns.openapi.vo.ExternalLinkageMapperVo" resultMap="externalLinkageMapperVo">
+		SELECT 
+			 B.BOARD_ID, 
+			 B.BOARD_DESC,
+			 B.BOARD_NAME,
+			 B.DELETE_YN,
+			 B.PUBLIC_YN,
+			 B.DEPTH,
+			 B.COMPANY_ID,
+			 O.USE_LINK_YN,
+			 O.LINK_URL,
+			 FOLDER_YN,
+			 O.BOARD_TYPE,
+			 O.ANONYMOUS_YN,
+			 	CASE WHEN <![CDATA[ LAST_ARTICLE_DATE >= sysdate-2 ]]> AND O.FOLDER_YN = 0
+			 	THEN LAST_ARTICLE_DATE
+				ELSE NULL
+				END  LAST_ARTICLE_DATE,
+			 FN_BBS_HASCHILDBOARD(B.BOARD_ID, 0, 'COMPANY' , 0) AS CHILD_CNT,
+			 O.USE_RSS_YN, F.FOLLOW_ID,
+			FROM TB_BBS_BOARD B, 
+				 TB_BBS_OPTION O LEFT JOIN TB_BBS_FOLLOW F ON F.BOARD_ID = O.BOARD_ID AND F.USER_ID = #{userId}
+			WHERE B.BOARD_ID   = O.BOARD_ID  
+			  AND DELETE_YN    = 0
+			  AND PARENT_ID    = #{parentId} <!-- 0 이라면 부모게시판 0이 아니라면 자식게시판 -->
+			  AND B.BOARD_MODE = 'COMPANY'
+			  AND COMPANY_ID   = #{companyId}
+			ORDER BY SORT_NO ASC
+	</select>
+	
+	<select id="selectExtFollowingList" parameterType="org.uengine.sns.openapi.vo.ExternalLinkageFollowingVo" resultMap="externalLinkageFollowingVo">
+	SELECT 
+		 TBF.FOLLOW_ID,
+		 TBF.USER_ID,
+		 TBF.BOARD_ID,
+		 TBF.REG_DATE,
+		 TBF.BOARD_MODE,
+		 TBB.BOARD_NAME
+		FROM TB_BBS_FOLLOW TBF INNER JOIN TB_BBS_BOARD TBB ON TBF.BOARD_ID = TBB.BOARD_ID
+		WHERE TBF.BOARD_MODE = 'COMPANY' 
+		  AND TBF.USER_ID= #{userId}
+	</select>
+	
+	<insert id="insertExtFollowingBoard" parameterType="org.uengine.sns.openapi.vo.ExternalLinkageFollowingVo">
+		INSERT INTO TB_BBS_FOLLOW 
+			(
+			 FOLLOW_ID, 
+			 USER_ID, 
+			 BOARD_ID, 
+			 REG_DATE, 
+			 BOARD_MODE
+			 )
+			 VALUES 
+			 (
+			  SQ_BBS_FOLLOW.NEXTVAL, 
+			  #{userId}, 
+			  #{boardId}, 
+			  SYSDATE, 
+			  #{boardMode}
+			  )
+	</insert>
+		
+	<delete id="deleteExtFollowingBoard" parameterType="hashmap">
+		DELETE FROM TB_BBS_FOLLOW
+		WHERE FOLLOW_ID = #{followId} 
+		  AND USER_ID = #{userId}
+	</delete>
+
+</mapper>

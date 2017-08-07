@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.chat.notice.mapper.ChatNoticeMapper">
+	
+	<!-- notice list resultMap -->
+	<resultMap id="chatNoticeListResultMap" type="org.uengine.sns.chat.notice.vo.ChatNoticeVo">
+		<id property="noticeId" 			column="NOTICE_ID"/>
+		<result property="itemType" 		column="ITEM_TYPE"/>
+		<result property="itemId" 			column="ITEM_ID"/>
+		<result property="itemTitle" 		column="ITEM_TITLE"/>
+		<result property="itemContent" 		column="ITEM_CONTENT"/>
+		<result property="toFollowerId" 	column="TO_FOLLOWER_ID"/>
+		<result property="toFollowerName" 	column="TO_FOLLOWER_NAME"/>
+		<result property="fromFollowerId" 	column="FROM_FOLLOWER_ID"/>
+		<result property="fromFollowerName" column="FROM_FOLLOWER_NAME"/>
+		<result property="isRead" 			column="ISREAD"/>
+		<result property="regDttm" 			column="REGDTTM"/>
+	</resultMap>
+	
+	<!-- follower 추가 -->	
+	<insert id="insertChatNotice" parameterType="org.uengine.sns.chat.notice.vo.ChatNoticeVo">
+		INSERT INTO	${defaultTablePrefix}CHAT_NOTICE 
+			(
+			 ITEM_TYPE,				<!-- 아이템 타입 -->	
+			 ITEM_ID,				<!-- 아이템 아이디 -->
+			 ITEM_TITLE,			<!-- 아이템 타이틀 -->
+			 ITEM_CONTENT,			<!-- 콘텐츠 -->
+			 TO_FOLLOWER_ID,		<!-- 알람 대상 아이디 -->
+			 TO_FOLLOWER_NAME,		<!-- 알람 대상 이름 -->
+			 FROM_FOLLOWER_ID,		<!-- 알람을 보낸 아이디 -->
+			 FROM_FOLLOWER_NAME,	<!-- 알람을 보낸 이름 -->
+			 ISREAD,				<!-- 알람 확인 여부 -->
+			 REGDTTM				<!-- 등록 일시 -->
+	        ) 
+        
+        	VALUES
+        
+	        (
+	         #{itemType,			jdbcType=VARCHAR},  
+	         #{itemId,				jdbcType=BIGINT},	   
+	         #{itemTitle,			jdbcType=VARCHAR},      
+	         #{itemContent,			jdbcType=VARCHAR},
+	         #{toFollowerId,		jdbcType=VARCHAR},      
+	         #{toFollowerName,		jdbcType=VARCHAR},
+	         #{fromFollowerId,		jdbcType=VARCHAR},      
+	         #{fromFollowerName,	jdbcType=VARCHAR},
+	         0,
+	         now()
+	 		 )
+	 		<selectKey keyProperty="noticeId" resultType="long" order="AFTER">
+        		SELECT last_insert_id()
+        	</selectKey>
+    </insert>
+    
+    <!-- userId가 포함된 room list 조회 -->
+	<select id="selectChatNotice" parameterType="string" resultMap="chatNoticeListResultMap">
+		SELECT
+			 NOTICE_ID,				<!-- 노티스 아이디 -->
+		 	 ITEM_TYPE,				<!-- 아이템 타입 -->	
+	 		 ITEM_ID,				<!-- 아이템 아이디 -->
+	 		 ITEM_TITLE,			<!-- 아이템 타이틀 -->
+	 		 ITEM_CONTENT,			<!-- 콘텐츠 -->
+			 TO_FOLLOWER_ID,		<!-- 알람 대상 아이디 -->
+			 TO_FOLLOWER_NAME,		<!-- 알람 대상 이름 -->
+			 FROM_FOLLOWER_ID,		<!-- 알람을 보낸 아이디 -->
+			 FROM_FOLLOWER_NAME,	<!-- 알람을 보낸 이름 -->
+			 ISREAD,				<!-- 알람 확인 여부 -->
+			 REGDTTM				<!-- 등록 일시 -->
+			FROM ${defaultTablePrefix}CHAT_NOTICE
+			WHERE TO_FOLLOWER_ID = #{userId}
+	</select>
+	
+	<!-- 확인 여부 업데이트 -->
+    <update id="updateChatNotice" parameterType="long">
+    	UPDATE ${defaultTablePrefix}CHAT_NOTICE
+   			SET ISREAD = 1
+    	WHERE NOTICE_ID = #{noticeId}
+    </update>
+    
+</mapper>

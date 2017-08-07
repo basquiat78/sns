@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+	<!-- Appender, Layout 설정 -->
+	<Appenders>
+		<RollingFile name="dailyRollingFile" fileName="D://LOG/sns/sns_access.log" filePattern="D://LOG/sns/sns_access.log.%d{yyyy-MM-dd}">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n" />
+			<Policies>
+				 <!-- interval(default 1)이므로 1초 간격으로 rolling 수행 --> 
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	
+	<!-- Logger 설정 -->
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="dailyRollingFile"/>
+		</Root>
+	</Loggers>
+
+</Configuration>

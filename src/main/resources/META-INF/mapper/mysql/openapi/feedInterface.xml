@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.FeedInterfaceMapper">
+
+	<insert id="insertExternalToDoFeed" parameterType="org.uengine.sns.feed.vo.FeedVo" >
+		INSERT INTO TB_TASK_IF 
+		(
+		 TASK_ID,
+		 TASK_NAME,
+		 STD_DATE,
+		 DUE_DATE,
+		 TASK_WRITER,
+		 TASK_WRITER_ID,
+		 TASK_STATUS,
+		 TASK_RATE,
+		 SP_ID,
+		 PARENT_SP_ID,
+		 SNS_ID,
+		 IF_DUE_TIME,
+		 IF_DIRECTTION,
+		 SNS_GROUP_ID,
+		 SP_ITEM_ID, 
+		 CRUD_TYPE,
+		 CREATED_DATE 
+		)
+		VALUES 
+		( 
+		 #{extTaskId},
+		 SUBSTRB(#{feedTitle, 	jdbcType=VARCHAR}, 1, 100),
+		 #{regDttm, 			jdbcType=DATE},
+		 STR_TO_DATE(SUBSTR(#{dueDate}, 0, 8), '%Y%m%d'),
+		 #{memberVo.memberName, jdbcType=VARCHAR},
+		 #{memberVo.syncKey, 	jdbcType=VARCHAR},
+		 '',
+		 '0',
+		 '',
+		 '',
+		 #{feedId},
+		 '0',
+		 'SNS',
+		 #{snsGroupId,			jdbcType=VARCHAR},
+		 '',
+		 #{crudType},
+		 SYSDATE
+		 )
+		<selectKey keyProperty="extTaskId" resultType="long" order="BEFORE">
+			SELECT SQ_TASK_IF.NEXTVAL FROM DUAL
+		</selectKey>
+	</insert>
+    
+	<update id="updateExternalTaskInfo" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		UPDATE TB_TASK_IF
+		   SET SNS_GROUP_ID = #{snsGroupId}
+		WHERE TASK_ID = #{extTaskId}
+	</update>
+	  
+	<insert id="insertExternalToDoPerson" parameterType="map">
+		INSERT INTO TB_TASK_PERSON 
+			(
+			 TASK_ID, 
+			 USER_ID, 
+			 USER_NAME, 
+			 CREATED_DATE
+			 )
+			VALUES 
+			(
+			 #{extTaskId}, 
+			 #{syncKey}, 
+			 #{followerName}, 
+			 SYSDATE
+			 )
+	</insert>
+    
+</mapper>

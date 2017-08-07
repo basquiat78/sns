@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.tenant.mapper.TenantMapper">
+	<!-- Tenant resultMap -->
+	<resultMap id="tenantListResultMap" type="org.uengine.sns.tenant.vo.TenantVo">
+		<id property="tenantId"			  	column="TENANT_ID"/>
+		<result property="tenantName" 	  	column="TENANT_NAME"/>
+		<result property="tenantDomain"  	column="TENANT_DOMAIN"/>
+		<result property="description" 	  	column="DESCRIPTION"/>
+		<result property="logoUrl" 		 	column="LOGO_URL"/>
+		<result property="mobileDomain" 	column="MOBILE_DOMAIN"/>
+		<result property="isNetwork" 		column="ISNETWORK"/>
+		<result property="networkApiUrl" 	column="NETWORK_API_URL"/>
+		<result property="networkAuthIp" 	column="NETWORK_AUTH_IP"/>
+		<result property="networkAuthToken"	column="NETWORK_AUTH_TOKEN"/>
+		<result property="companyId" 		column="COMPANY_ID"/>
+		<collection property="utmvo" javaType="java.util.ArrayList" resultMap="userTenantMappingListResultMap"/>
+		<collection property="gvo"   javaType="java.util.ArrayList" resultMap="groupListResultMap"/>
+	</resultMap>
+	
+	<!-- UserTenantMapping resultMap -->
+	<resultMap id="userTenantMappingListResultMap" type="org.uengine.sns.tenant.vo.UserTenantMappingVo">
+		<id property="mappingId"		column="MAPPING_ID"/>
+		<result property="partName" 	column="PART_NAME"/>
+		<result property="positionName" column="POSITION_NAME"/>
+		<result property="dutyName" 	column="DUTY_NAME"/>
+		<result property="isSelfPart"   column="ISSELFPART"/>
+		<result property="mappingSeq"   column="MAPPING_SEQ"/>
+		<result property="memberId"  	column="MEMBER_ID"/>
+		<result property="tenantId" 	column="TENANT_ID"/>
+	</resultMap>
+	
+	<!-- Group resultMap -->
+	<resultMap id="groupListResultMap" type="org.uengine.sns.group.vo.GroupVo">
+		<id property="groupId" 		 	column="GROUP_ID"/>
+		<result property="groupName" 	column="GROUP_NAME"/>
+		<result property="description"	column="DESCRIPTION"/>
+		<result property="isPublic"    	column="ISPUBLIC"/>
+		<result property="isAutoJoin"  	column="ISAUTOJOIN"/>
+		<result property="isDeleted"  	column="ISDELETED"/>
+		<result property="targetId" 	column="TARGET_ID"/>
+		<result property="targetType"  	column="TARGET_TYPE"/>
+		<result property="tenantId"    	column="TENANT_ID"/>
+	</resultMap>
+	
+	<!-- 전체 Tenant 조회 -->
+	<select id="selectTenantList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="tenantListResultMap">
+		SELECT 
+			 TST.TENANT_ID,		    	<!-- 테넌트 아이디 -->
+			 TST.TENANT_NAME,	    	<!-- 테넌트 이름 -->
+			 TST.TENANT_DOMAIN,	    	<!-- 테넌트 별칭 -->
+			 TST.DESCRIPTION,	    	<!-- 테넌트 설명 -->
+			 TST.LOGO_URL,		    	<!-- 로고 경로 -->
+			 TST.MOBILE_DOMAIN,	    	<!-- 모바일 Push 서버 도메인 -->
+			 TST.ISNETWORK,		    	<!-- 외부 네트워크 여부 -->
+			 TST.NETWORK_API_URL,    	<!-- 왜부 네트워크 API URL -->
+			 TST.NETWORK_AUTH_IP,    	<!-- 왜부 네트워크 인증 IP -->
+			 TST.NETWORK_AUTH_TOKEN,	<!-- 왜부 네트워크 인증 토큰 -->
+			 TST.COMPANY_ID 			<!-- 계열사 아이디 -->
+			FROM ${defaultTablePrefix}TENANT TST
+			ORDER BY TST.TENANT_ID
+	</select>
+
+	<!-- 단건의 Tenant 조회 -->
+	<select id="selectTenantById" parameterType="long" resultMap="tenantListResultMap">
+		SELECT 
+			 TST.TENANT_ID,		    	<!-- 테넌트 아이디 -->
+			 TST.TENANT_NAME,	    	<!-- 테넌트 이름 -->
+			 TST.TENANT_DOMAIN,	    	<!-- 테넌트 별칭 -->
+			 TST.DESCRIPTION,	    	<!-- 테넌트 설명 -->
+			 TST.LOGO_URL,		    	<!-- 로고 경로 -->
+			 TST.MOBILE_DOMAIN,	    	<!-- 모바일 Push 서버 도메인 -->
+			 TST.ISNETWORK,		    	<!-- 외부 네트워크 여부 -->
+			 TST.NETWORK_API_URL,    	<!-- 왜부 네트워크 API URL -->
+			 TST.NETWORK_AUTH_IP,    	<!-- 왜부 네트워크 인증 IP -->
+			 TST.NETWORK_AUTH_TOKEN,	<!-- 왜부 네트워크 인증 토큰 -->
+			 TST.COMPANY_ID 			<!-- 계열사 아이디 -->
+			FROM ${defaultTablePrefix}TENANT TST
+			WHERE TST.TENANT_ID = #{tenantId}
+			ORDER BY TST.TENANT_ID
+	</select>
+	
+	<!-- 단건의 Tenant 조회 -->
+	<select id="selectTenantByCompanyId" parameterType="String" resultMap="tenantListResultMap">
+		SELECT 
+			 TST.TENANT_ID,		    	<!-- 테넌트 아이디 -->
+			 TST.TENANT_NAME,	    	<!-- 테넌트 이름 -->
+			 TST.TENANT_DOMAIN,	    	<!-- 테넌트 별칭 -->
+			 TST.DESCRIPTION,	    	<!-- 테넌트 설명 -->
+			 TST.LOGO_URL,		    	<!-- 로고 경로 -->
+			 TST.MOBILE_DOMAIN,	    	<!-- 모바일 Push 서버 도메인 -->
+			 TST.ISNETWORK,		    	<!-- 외부 네트워크 여부 -->
+			 TST.NETWORK_API_URL,    	<!-- 왜부 네트워크 API URL -->
+			 TST.NETWORK_AUTH_IP,    	<!-- 왜부 네트워크 인증 IP -->
+			 TST.NETWORK_AUTH_TOKEN, 	<!-- 왜부 네트워크 인증 토큰 -->
+			 TST.COMPANY_ID 			<!-- 계열사 아이디 -->
+		FROM ${defaultTablePrefix}TENANT TST
+		WHERE TST.COMPANY_ID = #{companyId}
+		ORDER BY TST.TENANT_ID
+	</select>
+
+	<!-- 단건의 Tenant 조회 (userId 에 의해 -->
+	<select id="selectTenantByUserId" parameterType="String" resultMap="tenantListResultMap">
+		SELECT 
+			 TST.TENANT_ID,		    	<!-- 테넌트 아이디 -->
+			 TST.TENANT_NAME,	    	<!-- 테넌트 이름 -->
+			 TST.TENANT_DOMAIN,	    	<!-- 테넌트 별칭 -->
+			 TST.DESCRIPTION,	    	<!-- 테넌트 설명 -->
+			 TST.LOGO_URL,		    	<!-- 로고 경로 -->
+			 TST.MOBILE_DOMAIN,	    	<!-- 모바일 Push 서버 도메인 -->
+			 TST.ISNETWORK,		    	<!-- 외부 네트워크 여부 -->
+			 TST.NETWORK_API_URL,    	<!-- 왜부 네트워크 API URL -->
+			 TST.NETWORK_AUTH_IP,    	<!-- 왜부 네트워크 인증 IP -->
+			 TST.NETWORK_AUTH_TOKEN, 	<!-- 왜부 네트워크 인증 토큰 -->
+			 TST.COMPANY_ID 			<!-- 계열사 아이디 -->
+		FROM ${defaultTablePrefix}TENANT TST, ${defaultTablePrefix}MEMBER TSM
+		WHERE TST.TENANT_ID = TSM.TENANT_ID
+		  AND TSM.SYNC_KEY = #{value}
+		LIMIT 1
+	</select>
+
+	<!-- Tenant 추가 -->	
+	<insert id="insertTenant" parameterType="org.uengine.sns.tenant.vo.TenantVo">
+		INSERT INTO	${defaultTablePrefix}TENANT 
+			(
+			 TENANT_NAME,	     <!-- 테넌트 이름 -->
+			 TENANT_DOMAIN,	     <!-- 테넌트 별칭 -->
+			 DESCRIPTION,	     <!-- 테넌트 설명 -->
+			 LOGO_URL,		     <!-- 로고 경로 -->
+			 MOBILE_DOMAIN,	     <!-- 모바일 Push 서버 도메인 -->
+			 ISNETWORK,		     <!-- 외부 네트워크 여부 -->
+			 NETWORK_API_URL,    <!-- 왜부 네트워크 API URL -->
+			 NETWORK_AUTH_IP,    <!-- 왜부 네트워크 인증 IP -->
+			 NETWORK_AUTH_TOKEN, <!-- 왜부 네트워크 인증 토큰 -->
+			 COMPANY_ID 		 <!-- 계열사 아이디 -->
+	        ) 
+	        VALUES
+	        (
+	         #{tenantName		, jdbcType=VARCHAR}, 
+	         #{tenantDomain		, jdbcType=VARCHAR}, 
+	         #{description		, jdbcType=VARCHAR}, 
+	         #{logoUrl			, jdbcType=VARCHAR}, 
+	         #{mobileDomain		, jdbcType=VARCHAR},  	 	
+			 #{isNetwork}, 
+			 #{networkApiUrl	, jdbcType=VARCHAR}, 
+			 #{networkAuthIp	, jdbcType=VARCHAR}, 
+			 #{networkAuthToken	, jdbcType=VARCHAR}, 
+			 #{companyId		, jdbcType=VARCHAR}	
+	 		 )	
+		<selectKey keyProperty="tenantId" resultType="long" order="AFTER">
+			SELECT last_insert_id()
+		</selectKey>
+	</insert>
+    
+    <!-- Tenant 갱신 -->
+	<update id="updateTenant" parameterType="org.uengine.sns.tenant.vo.TenantVo">
+    	UPDATE ${defaultTablePrefix}TENANT SET
+    		TENANT_ID = #{tenantId}
+    		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(tenantName)">
+		    	,TENANT_NAME = #{tenantName}		    	<!-- 테넌트 아이디 -->
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(tenantDomain)">
+				,TENANT_DOMAIN= #{tenantDomain}    			<!-- 테넌트 별칭 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(description)">  
+				,DESCRIPTION= #{description}	    	 	<!-- 테넌트 설명 -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(logoUrl)">             
+				,LOGO_URL= #{logoUrl}		    	 		<!-- 로고경로-->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(mobileDomain)">       
+				,MOBILE_DOMAIN= #{mobileDomain}		    	<!-- 모바일 Push 서버 도메인	-->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(isNetwork)">        
+				,ISNETWORK= #{isNetwork}					<!-- 외부 네트워크 여부 --> 
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(networkApiUrl)">   
+				,NETWORK_API_URL= #{networkApiUrl}   		<!-- 왜부 네트워크 API URL -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(networkAuthIp)">      
+				,NETWORK_AUTH_IP= #{networkAuthIp}			<!-- 왜부 네트워크 인증 IP -->
+			</if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(networkAuthToken)">           
+				,NETWORK_AUTH_TOKEN= #{networkAuthToken}	<!-- 왜부 네트워크 인증 토큰 -->
+			</if>
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(companyId)">           
+				,COMPANY_ID= #{companyId}					<!-- 계열사 아이디 -->
+			</if>
+    	WHERE TENANT_ID = ${tenantId}
+	</update>
+	
+	<!-- Tenant 삭제 -->
+	<delete id="deleteTenant" parameterType="long">
+		DELETE FROM ${defaultTablePrefix}TENANT WHERE TENANT_ID = #{tenantId}
+	</delete>
+
+</mapper>

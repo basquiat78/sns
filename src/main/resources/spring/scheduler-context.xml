@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	
+	<!-- quartz 설정 관련 -->
+	<bean id="chatNoticeService" class="org.uengine.sns.chat.notice.service.ChatNoticeService"/>
+	<bean id="chatNoticeQuartzJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	    <property name="jobClass" value="org.uengine.sns.chat.common.batch.NoticeWebSocketJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="chatNoticeService" 	value-ref="chatNoticeService"/>
+                <entry key="wsServerUrl"  		value="#{conf['websocket.server.url']}"/>
+                <entry key="wsServerPath"		value="#{conf['websocket.server.path']}"/>
+            </map>
+        </property>
+	</bean>
+	
+	<bean id="recentService" class="org.uengine.sns.recent.service.RecentService" />
+	<bean id="recentFeedManageJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	<property name="jobClass" value="org.uengine.sns.common.batch.RecentFeedManageJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="recentService"	value-ref="recentService"/>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="feedFileService" 	 				class="org.uengine.sns.feed.service.FeedFileService" />
+	<bean id="fileService" 		 				class="org.uengine.sns.common.util.service.FileService" />
+	<bean id="sharePointService" 				class="org.uengine.sns.openapi.service.SharePointService" />
+	<bean id="sharePointFileuploadManageJob"	class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="org.uengine.sns.common.batch.SharePointFileUploadJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="feedFileService" 	value-ref="feedFileService"/>
+				<entry key="fileService" 		value-ref="fileService"/>
+				<entry key="sharePointService" 	value-ref="sharePointService"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- interface group 설정 -->
+	<bean id="interfaceGroupService" 	class="org.uengine.sns.interfacegroup.service.InterfaceGroupService" />
+	<bean id="interfaceGroupManageJob" 	class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="org.uengine.sns.common.batch.InterfaceGroupManageJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="interfaceGroupService"	value-ref="interfaceGroupService"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- 일정도래 -->
+	<bean id="noticeService" 		class="org.uengine.sns.notice.service.NoticeService"/>
+	<bean id="ToDoFeedManageJob"	class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="org.uengine.sns.common.batch.ToDoFeedManageJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="noticeService"	value-ref="noticeService"/>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="tmpFileDeleteJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="org.uengine.sns.common.batch.TmpFileDeleteJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="feedFileService"	value-ref="feedFileService"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- 2. Cron 시간 설정 -->
+	<bean id="chatNoticeTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail" ref="chatNoticeQuartzJob"/>
+	    <property name="cronExpression" value="0/10 * * * * ?"/>
+	</bean>
+	<bean id="recentTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="recentFeedManageJob"/>
+	    <property name="cronExpression" value="0 11 1 * * ?"/>
+	</bean>
+	<bean id="tomorrowToDoTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="ToDoFeedManageJob"/>
+	    <property name="cronExpression" value="0 30 8 * * ?"/>
+	</bean>
+	<bean id="tmpFileDeleteTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="tmpFileDeleteJob"/>
+		<property name="cronExpression" value="0 0 1 * * ?"/>
+	</bean>
+	<!-- 커스터마이징 영역  	
+	<bean id="interfaceGroupTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="interfaceGroupManageJob"/>
+		<property name="cronExpression" value="0 0 1 * * ?"/>
+		<property name="jobDataMap">
+			<map>
+				<entry key="companyId" value="418" />
+			</map>
+		</property>
+	</bean>
+	<bean id="sharePointFileuploadTrigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sharePointFileuploadManageJob"/>
+		<property name="cronExpression" value="0/5 * * * * ?"/>
+		<property name="jobDataMap">
+			<map>
+				<entry key="transferCnt" value="0" />
+			</map>
+		</property>
+	</bean>
+	<bean id="sharePointFileuploadTrigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sharePointFileuploadManageJob"/>
+		<property name="cronExpression" value="0/7 * * * * ?"/>
+		<property name="jobDataMap">
+			<map>
+				<entry key="transferCnt" value="1" />
+			</map>
+		</property>
+	</bean>
+	<bean id="sharePointFileuploadTrigger3" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sharePointFileuploadManageJob"/>
+		<property name="cronExpression" value="0 0/1 * * * ?"/>
+		<property name="jobDataMap">
+			<map>
+				<entry key="transferCnt" value="2" />
+			</map>
+		</property>
+	</bean>
+	-->
+	 
+	<!-- 3. Cron 실행 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="chatNoticeTrigger"/>
+				<ref bean="recentTrigger" />
+				<ref bean="tmpFileDeleteTrigger" />
+				<ref bean="tomorrowToDoTrigger" />
+				<!-- 커스터마이징 영역
+				<ref bean="sharePointFileuploadTrigger1" />
+				<ref bean="sharePointFileuploadTrigger2" />
+				<ref bean="sharePointFileuploadTrigger3" />
+				<ref bean="interfaceGroupTrigger" />
+				 -->
+			</list>
+		</property>
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+				<prop key="org.quartz.threadPool.threadCount">10</prop>
+				<prop key="org.quartz.threadPool.threadPriority">4</prop>
+				<prop key="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</prop>
+				<prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

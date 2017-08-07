@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.PollMapper">
+	
+	<resultMap id="feedResultMap" type="org.uengine.sns.feed.vo.FeedVo">
+		<id property="feedId" 		  		column="FEED_ID" />
+		<result property="feedTitle" 	  	column="FEED_TITLE"/>
+		<result property="pFeedId" 	  		column="P_FEED_ID"/>
+		<result property="feedType" 	  	column="FEED_TYPE"/>
+		<result property="cmtLstFstFeedId"	column="CMT_LST_FST_FEED_ID"/>
+		<result property="cmtLstSecFeedId" 	column="CMT_LST_SEC_FEED_ID"/>
+		<result property="feedContents" 	column="FEED_CONTENTS" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="likeItCnt" 	  	column="LIKEIT_CNT"/>
+		<result property="shareCnt" 	  	column="SHARE_CNT"/>
+		<result property="cmtCnt" 	  		column="CMT_CNT"/>
+		<result property="contentsType" 	column="CONTENTS_TYPE"/>
+		<collection property="feedFollowerList"	javaType="java.util.ArrayList" resultMap="feedFollowerListResultMap"/>
+		<collection property="feedTagList"     	javaType="java.util.ArrayList" resultMap="feedTagListResultMap"/>
+		<collection property="feedPollList"     javaType="java.util.ArrayList" resultMap="pollResultMap"/>
+	</resultMap>
+	
+	<resultMap id="pollResultMap" type="org.uengine.sns.feed.vo.PollVo">
+		<result property="feedId" 	column="FEED_ID"/>
+		<result property="seq" 		column="SEQ"/>
+		<result property="choice" 	column="CHOICE"/>
+		<result property="memberId"	column="MEMBER_ID"/>
+	</resultMap>
+	
+	<resultMap id="feedFollowerListResultMap" type="org.uengine.sns.feed.vo.FollowerVo">
+		<result property="itemId"   	column="ITEM_ID"/>
+		<result property="followerId"   column="FOLLOWER_ID"/>
+		<result property="itemType"   	column="ITEM_TYPE"/>
+		<result property="followerType" column="FOLLOWER_TYPE"/>
+	</resultMap>
+	
+	<resultMap id="feedTagListResultMap" type="org.uengine.sns.feed.vo.TagVo">
+		<result property="tagName"	column="TAG_NM"/>
+	</resultMap>
+	
+	<select id="selectPollList" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="feedResultMap">
+		SELECT
+		 AAA.FEED_ID
+		, AAA.FEED_TITLE
+		, AAA.P_FEED_ID
+		, AAA.FEED_TYPE
+		, AAA.FEED_CONTENTS
+		, AAA.CMT_LST_FST_FEED_ID
+		, AAA.CMT_LST_SEC_FEED_ID
+		, AAA.CONTENTS_TYPE
+		, AAA.LIKEIT_CNT
+		, AAA.SHARE_CNT
+		, AAA.CMT_CNT
+		, DDD.SEQ
+		, DDD.CHOICE
+		FROM ${defaultTablePrefix}FEED AAA
+		INNER JOIN ${defaultTablePrefix}POLL DDD
+		ON AAA.FEED_ID = DDD.FEED_ID
+		WHERE AAA.FEED_ID = #{feedId}
+		ORDER BY AAA.FEED_ID, DDD.SEQ
+	</select>
+	
+	<select id="selectPollResultList" parameterType="long" resultMap="pollResultMap">
+		SELECT
+		     FEED_ID,
+		     SEQ,
+		     MEMBER_ID
+			FROM ${defaultTablePrefix}POLLRESULT
+			WHERE FEED_ID = #{feedId}
+			ORDER BY SEQ
+	</select>
+	
+	<insert id="insertPollInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		INSERT INTO ${defaultTablePrefix}POLL 
+			(
+			FEED_ID,
+		 	SEQ,
+		 	CHOICE
+		 	)
+		 	VALUES 
+		 	( 
+		 	 #{feedId},
+		 	 #{seq},
+		  	 #{choice} 
+		  	)
+	</insert>
+	
+	<insert id="insertPollResultInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		INSERT INTO ${defaultTablePrefix}POLLRESULT 
+			( 
+			 FEED_ID,
+		 	 SEQ,
+		 	 MEMBER_ID
+		 	)
+		 	VALUES 
+		 	( 
+		 	 #{feedId},
+		  	 #{seq},
+		  	 #{memberId}
+		 	)
+	</insert>
+	
+	<update id="updatePollInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		UPDATE ${defaultTablePrefix}POLL
+		   SET CHOICE = #{choice}
+		WHERE FEED_ID = #{feedId}
+		  AND SEQ = #{seq}
+	</update>
+	
+	<update id="updatePollResultInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		UPDATE ${defaultTablePrefix}POLLRESULT
+		   SET MEMBER_ID = #{memberId}
+		WHERE FEED_ID = #{feedId}
+		  AND SEQ = #{seq}
+	</update>
+	
+	<delete id="deletePollInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		DELETE FROM ${defaultTablePrefix}POLL
+		WHERE FEED_ID = #{feedId}
+	</delete>
+	
+	<delete id="deletePollResultInfo" parameterType="org.uengine.sns.feed.vo.PollVo">
+		DELETE FROM ${defaultTablePrefix}POLLRESULT
+		WHERE FEED_ID = #{feedId}
+		<if test="memberId != null">
+		AND MEMBER_ID = #{memberId}
+		</if>
+	</delete>
+	
+	<delete id="deletePollResultListInfo" parameterType="org.uengine.sns.feed.vo.FeedVo">
+		DELETE FROM ${defaultTablePrefix}POLLRESULT
+		WHERE (FEED_ID, MEMBER_ID) IN (
+			<foreach item="list" index="index" collection="feedPollList" separator="," > 
+				<if test="#{list.feedId} != null and #{list.feedId} != '' ">
+					<if test="#{list.memberId} != null and #{list.memberId} != '' ">
+					   	( #{list.feedId} , #{list.memberId} ) 
+					</if>
+				</if>
+			</foreach>
+			
+		)
+	</delete>
+	
+	<select id="selectPollFeedInfo" parameterType="long" resultMap="pollResultMap">
+		SELECT
+		     FEED_ID,
+		     SEQ,
+		     CHOICE
+			FROM ${defaultTablePrefix}POLL
+			WHERE FEED_ID = #{feedId}
+			ORDER BY SEQ
+	</select>
+
+</mapper>

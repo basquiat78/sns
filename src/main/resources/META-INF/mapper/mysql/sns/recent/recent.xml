@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.recent.mapper.RecentMapper">
+	
+	<!-- Recent Act resultMap -->
+	<resultMap id="recentActResultMap" type="org.uengine.sns.notice.vo.NoticeVo">
+		<result property="noticeId"			column="NOTI_ID" />
+		<result property="noticeContent"	  	column="NOTI_CONTENT" />
+		<result property="itemType"  	    column="ITEM_TYPE"/>
+		<result property="itemId"  	  	  	column="ITEM_ID"/>
+		<result property="itemTitle" 	  	column="ITEM_TITLE"/>
+		<result property="followerId"  	  	column="FOLLOWER_ID"/>
+		<result property="followerType" 	column="FOLLOWER_TYPE"/>
+		<result property="actType" 	      	column="ACT_TYPE"/>
+		<result property="regDttm" 	      	column="REGDTTM"/>
+		<result property="fromMemberId" 	column="FROM_MEMBER_ID"/>
+		<result property="fromMemberName"	column="FROM_MEMBER_NAME"/>
+		<result property="toMemberId" 	  	column="TO_MEMBER_ID"/>
+		<result property="toMemberName" 	column="TO_MEMBER_NAME"/>
+		<result property="noticeContentKo"	column="NOTI_CONTENT_KO" />
+		<result property="noticeContentEn"	column="NOTI_CONTENT_EN" />
+		<result property="noticeContentZh"	column="NOTI_CONTENT_ZH" />
+		<result property="syncKey"	  	  	column="SYNC_KEY" />
+	</resultMap>
+	
+	<!-- Recent resultMap -->
+	<resultMap id="recentResultMap" type="org.uengine.sns.recent.vo.RecentVo">
+		<result property="regMemberId"  column="REG_MEMBER_ID"/>
+		<result property="itemId"  	  	column="ITEM_ID"/>
+		<result property="itemType" 	column="ITEM_TYPE"/>
+		<result property="updateDate"   column="UPDATEDATE"/>
+		<result property="clickedCount"	column="CLICKEDCOUNT"/>
+	</resultMap>
+	
+	<select id="selectRecentActivityListByMember" parameterType="long" resultMap="recentActResultMap">
+		SELECT *
+			FROM (
+				SELECT 
+					 TSN.ITEM_TYPE
+					,TSN.ITEM_ID
+					,TSN.ITEM_TITLE
+					,TSN.FOLLOWER_ID
+					,TSN.FOLLOWER_TYPE
+					,TSN.ACT_TYPE
+					,TSN.REGDTTM
+					,TSN.FROM_MEMBER_ID
+					,TSN.NOTI_ID
+					,TSN.NOTI_CONTENT
+					,FROMTSM.MEMBER_NAME FROM_MEMBER_NAME
+					,TSN.TO_MEMBER_ID
+					,TOTSM.MEMBER_NAME  TO_MEMBER_NAME
+					,TSN.NOTI_CONTENT_KO
+					,TSN.NOTI_CONTENT_EN
+					,TSN.NOTI_CONTENT_ZH
+					,FROMTSM.SYNC_KEY
+				FROM ${defaultTablePrefix}NOTI TSN
+				  INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+				  INNER JOIN ${defaultTablePrefix}MEMBER TOTSM ON TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+				WHERE TSN.TO_MEMBER_ID = #{memberId}
+				ORDER BY NOTI_ID DESC
+				LIMIT 5
+			) X 
+	</select>
+	
+	<select id="selectRecentActivityListBySynckey" parameterType="String" resultMap="recentActResultMap">
+		SELECT *
+			FROM (
+				SELECT 
+					 TSN.ITEM_TYPE
+					,TSN.ITEM_ID
+					,TSN.ITEM_TITLE
+					,TSN.FOLLOWER_ID
+					,TSN.FOLLOWER_TYPE
+					,TSN.ACT_TYPE
+					,TSN.REGDTTM
+					,TSN.FROM_MEMBER_ID
+					,TSN.NOTI_ID
+					,TSN.NOTI_CONTENT
+					,TSN.NOTI_CONTENT_KO
+					,TSN.NOTI_CONTENT_EN
+					,TSN.NOTI_CONTENT_ZH
+					,FROMTSM.MEMBER_NAME FROM_MEMBER_NAME
+					,TSN.TO_MEMBER_ID
+					,TOTSM.MEMBER_NAME  TO_MEMBER_NAME
+					,FROMTSM.SYNC_KEY
+				FROM ${defaultTablePrefix}NOTI TSN
+				  INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+				  INNER JOIN ${defaultTablePrefix}MEMBER TOTSM ON TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+				WHERE TSN.TO_MEMBER_ID = (SELECT MEMBER_ID FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY=#{userId})
+				ORDER BY NOTI_ID DESC
+				LIMIT 10
+			) X 
+	</select>
+	
+	<delete id="deleteRecentActBatch" parameterType="string">
+		DELETE FROM ${defaultTablePrefix}NOTI
+		 WHERE <![CDATA[ REGDTTM < CAST(DATE_FORMAT(date_add(now(), interval -5 day), '%Y%m%d') AS DATE) ]]>
+	</delete>
+	
+	<select id="selectGroupRecentActivityList" parameterType="long" resultMap="recentActResultMap">
+		SELECT *
+			FROM (
+				SELECT 
+					 TSN.ITEM_TYPE
+					,TSN.ITEM_ID
+					,TSN.ITEM_TITLE
+					,TSN.FOLLOWER_ID
+					,TSN.FOLLOWER_TYPE
+					,TSN.ACT_TYPE
+					,TSN.REGDTTM
+					,TSN.FROM_MEMBER_ID
+					,TSN.NOTI_CONTENT_KO
+					,TSN.NOTI_CONTENT_EN
+					,TSN.NOTI_CONTENT_ZH
+					,FROMTSM.MEMBER_NAME FROM_MEMBER_NAME
+					,TSN.TO_MEMBER_ID
+					,TSN.NOTI_CONTENT
+					,FROMTSM.SYNC_KEY
+				FROM ${defaultTablePrefix}NOTI TSN
+				  INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+				  WHERE TSN.FOLLOWER_TYPE = 'GROUP'
+				  AND TSN.FOLLOWER_ID = #{groupId, jdbcType=BIGINT}
+				  AND TSN.ISDELETED = '0'
+				ORDER BY TSN.NOTI_ID DESC
+				LIMIT 5 
+			) X
+	</select>
+	
+	<select id="selectRecentActivityListByGroup" parameterType="long" resultMap="recentActResultMap">
+		SELECT *
+			FROM (
+				SELECT 
+					 TSN.ITEM_TYPE
+					,TSN.ITEM_ID
+					,TSN.ITEM_TITLE
+					,TSN.FOLLOWER_ID
+					,TSN.FOLLOWER_TYPE
+					,TSN.ACT_TYPE
+					,TSN.REGDTTM
+					,TSN.FROM_MEMBER_ID
+					,TSN.NOTI_CONTENT_KO
+					,TSN.NOTI_CONTENT_EN
+					,TSN.NOTI_CONTENT_ZH
+					,FROMTSM.MEMBER_NAME FROM_MEMBER_NAME
+					,TSN.TO_MEMBER_ID
+					,TSN.NOTI_CONTENT
+					,TOTSM.MEMBER_NAME  TO_MEMBER_NAME
+					,FROMTSM.SYNC_KEY
+				FROM ${defaultTablePrefix}NOTI TSN
+				  INNER JOIN ${defaultTablePrefix}MEMBER FROMTSM ON TSN.FROM_MEMBER_ID = FROMTSM.MEMBER_ID
+				  INNER JOIN ${defaultTablePrefix}MEMBER TOTSM ON TSN.TO_MEMBER_ID = TOTSM.MEMBER_ID
+				WHERE FOLLOWER_TYPE = 'GROUP'
+				  AND FOLLOWER_ID = #{groupId}
+				ORDER BY TSN.NOTI_ID DESC
+				LIMIT 5 
+			) X
+	</select>
+	
+	<!-- 전체 Recent 조회 -->
+	<select id="selectRecentList" parameterType="long" resultMap="recentResultMap">
+		SELECT 
+			 REG_MEMBER_ID, <!-- 멤버 아이디 -->   
+			 ITEM_ID,       <!-- 아이템 아이디 -->  
+			 ITEM_TYPE,     <!-- 아이템 타입 -->
+			 UPDATEDATE,    <!-- 갱신일자 -->
+			 CLICKEDCOUNT   <!-- 갱신획수 -->
+			FROM (
+  				 SELECT * 
+  				 	FROM ${defaultTablePrefix}RCTITEM 
+  				 	ORDER BY UPDATEDATE DESC
+  				  ) X
+			WHERE REG_MEMBER_ID= #{regMemberId}
+  		 	LIMIT 5
+	</select>
+	
+	<!-- Recent 추가 -->	
+	<insert id="insertRecent" parameterType="org.uengine.sns.recent.vo.RecentVo">
+		INSERT INTO	${defaultTablePrefix}RCTITEM 
+			(
+			 REG_MEMBER_ID, <!-- 멤버 아이디 -->   
+		     ITEM_ID,       <!-- 아이템 아이디 -->  
+			 ITEM_TYPE,     <!-- 아이템 타입 -->
+			 UPDATEDATE,    <!-- 갱신일자 -->
+			 CLICKEDCOUNT   <!-- 갱신획수 -->
+	        ) 
+	        VALUES
+	        (
+	         #{regMemberId}, 
+	         #{itemId}, 
+	         #{itemType}, 
+	         #{updateDate},  	 	
+			 1
+	 		 )
+	</insert>
+
+    <!-- Recent 갱신 -->
+	<update id="updateRecent" parameterType="org.uengine.sns.recent.vo.RecentVo">
+   		UPDATE ${defaultTablePrefix}RCTITEM 
+	       SET UPDATEDATE = #{updateDate},
+    		   CLICKEDCOUNT = CLICKEDCOUNT + 1
+    	WHERE REG_MEMBER_ID = #{regMemberId}
+    	  AND ITEM_ID = #{itemId}
+    	  AND ITEM_TYPE = #{itemType}
+	</update>
+
+	<!-- Recent 삭제 -->
+	<update id="deleteRecent" parameterType="long">
+	</update>
+
+</mapper>

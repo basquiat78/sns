@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.group.mapper.GroupMapper">
+	
+	<!-- 그룹 resultMap -->
+	<resultMap id="groupListResultMap" type="org.uengine.sns.group.vo.GroupVo">
+		<id property="groupId" 		 		column="GROUP_ID"/>
+		<result property="groupName" 	 	column="GROUP_NAME"/>
+		<result property="groupImgUrl" 		column="GROUP_IMG_URL"/>
+		<result property="groupType"   		column="GROUP_TYPE"/>
+		<result property="pGroupId" 	 	column="P_GROUP_ID"/>
+		<result property="description" 		column="DESCRIPTION"/>
+		<result property="isPublic"    		column="ISPUBLIC"/>
+		<result property="isAutoJoin"  		column="ISAUTOJOIN"/>
+		<result property="isDeleted" 	 	column="ISDELETED"/>
+		<result property="targetId" 		column="TARGET_ID"/>
+		<result property="targetType"  		column="TARGET_TYPE"/>
+		<result property="tenantId"    		column="TENANT_ID"/>
+		<result property="regDttm"     		column="REGDTTM"/>
+		<result property="regMemberId" 		column="REG_MEMBER_ID"/>
+		<result property="memberCnt" 		column="MEMBERCNT"/>
+		<result property="regMemberName"	column="MEMBER_NAME"/>
+		<result property="fileRepoId" 		column="FILE_REPO_ID"/>
+		<result property="isMember" 		column="AM_I_MEMBER"/>
+		<collection property="knwldgList" 			javaType="java.util.ArrayList" resultMap="knowledgeFeedListResultMap"/>
+		<collection property="groupFollowerList" 	javaType="java.util.ArrayList" resultMap="groupFollowerListResultMap"/>
+	</resultMap>
+
+	<!-- 지식 피드 resultMap -->
+	<resultMap id="knowledgeFeedListResultMap" type="org.uengine.sns.group.vo.KnowledgeFeedVo">
+		<result property="feedId" 		  column="FEED_ID"/>
+		<result property="groupId" 		  column="GROUP_ID"/>
+		<result property="isApproval" 	  column="ISAPPROVAL"/>
+		<result property="knwldgMemberId" column="KNWLDG_MEMBER_ID"/>
+	</resultMap>
+	
+	<!-- 그룹 팔로워 resultMap -->
+	<resultMap id="groupFollowerListResultMap" type="org.uengine.sns.group.vo.GroupFollowerVo">
+		<result property="groupId" 	   column="GROUP_ID"/>
+		<result property="memberId"    column="MEMBER_ID"/>
+		<result property="newFeedCnt"  column="NEW_FEEDCNT"/>
+		<result property="isGroupMng"  column="ISGROUPMNG"/>
+		<result property="isInvite"    column="ISINVITE"/>
+		<result property="invitorId"   column="INVITOR_ID"/>
+		<result property="joinStatus"  column="JOIN_STATUS"/>
+	</resultMap>
+	
+	<!-- 그룹 resultMap2 -->
+	<resultMap id="groupListResultMap2" type="org.uengine.sns.group.vo.GroupVo">
+		<id property="groupId" 		 	column="GROUP_ID"/>
+		<result property="groupName" 	column="GROUP_NAME"/>
+		<result property="description"	column="DESCRIPTION"/>
+		<result property="isPublic"    	column="ISPUBLIC"/>
+		<result property="isAutoJoin"  	column="ISAUTOJOIN"/>
+		<result property="isDeleted" 	column="ISDELETED"/>
+		<result property="targetId" 	column="TARGET_ID"/>
+		<result property="targetType"  	column="TARGET_TYPE"/>
+		<result property="tenantId"    	column="TENANT_ID"/>
+	</resultMap>
+	
+	<resultMap id="groupNameChkResult" type="org.uengine.sns.group.vo.GroupVo">
+		<result property="groupName"	column="GROUP_NAME"/>
+	</resultMap>
+	
+	<!-- Widget용 Group 조회(개인, 추천, 신규) -->
+	<select id="selectGroupListBySearchcondition" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupListResultMap">
+		SELECT
+			GROUP_ID
+			, GROUP_NAME
+			, GROUP_IMG_URL
+			, GROUP_TYPE
+			, P_GROUP_ID
+			, DESCRIPTION
+			, ISPUBLIC
+			, ISAUTOJOIN
+			, ISDELETED
+			, TARGET_ID
+			, TARGET_TYPE
+			, TENANT_ID
+			, REGDTTM
+			, REG_MEMBER_ID
+			, MEMBERCNT
+			, AM_I_MEMBER
+			FROM (
+			SELECT A.* FROM (
+				SELECT 
+                    TSG.GROUP_ID,        
+                    TSG.GROUP_NAME,        
+                    TSG.GROUP_IMG_URL,     
+                    TSG.GROUP_TYPE,        
+                    TSG.P_GROUP_ID,    
+                    TSG.DESCRIPTION,
+                    TSG.ISPUBLIC,  
+                    TSG.ISAUTOJOIN,      
+                    TSG.ISDELETED,       
+                    TSG.TARGET_ID,       
+                    TSG.TARGET_TYPE,     
+                    TSG.TENANT_ID,        
+                    TSG.REGDTTM,        
+                    TSG.REG_MEMBER_ID
+                    , TSGF.CNT AS MEMBERCNT
+                    , CASE 
+                            WHEN (TSGF2.GROUP_ID IS NULL AND TSGF2.JOIN_STATUS IS NULL) THEN 'NOTAMEMBER'
+                            WHEN (TSGF2.GROUP_ID IS NOT NULL AND TSGF2.JOIN_STATUS IS NULL) THEN 'STANDBY'
+                            WHEN TSGF2.JOIN_STATUS = 'COMPLETE' THEN 'COMPLETE'
+                            WHEN TSGF2.JOIN_STATUS = 'REJECT' THEN 'REJECT'
+                    END AS AM_I_MEMBER
+                FROM ${defaultTablePrefix}GROUP TSG
+                    
+                    INNER JOIN (
+                        SELECT GROUP_ID, COUNT(MEMBER_ID) CNT FROM ${defaultTablePrefix}GRPFWL WHERE JOIN_STATUS = 'COMPLETE' GROUP BY GROUP_ID
+                    ) TSGF ON TSGF.GROUP_ID = TSG.GROUP_ID
+                    
+                    LEFT JOIN (
+                        SELECT GROUP_ID,JOIN_STATUS, LST_ACCESS_DTTM FROM ${defaultTablePrefix}GRPFWL WHERE MEMBER_ID = #{memberId}
+                    ) TSGF2 ON TSGF2.GROUP_ID = TSG.GROUP_ID
+                    
+                    
+                WHERE TSG.ISDELETED = 0 
+                AND TSG.ISHIDE = 0
+                AND TSG.ISPUBLIC = 1
+                
+                <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupName)">
+				AND   upper(TSG.GROUP_NAME) LIKE CONCAT('%', upper(#{groupName}), '%') escape '|'
+				</if>
+                
+                ORDER BY TSGF2.LST_ACCESS_DTTM DESC, TSG.GROUP_ID
+			) A WHERE
+			1=1
+			<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(selectType)">
+				LIMIT #{start} , #{cnt}
+			</if>
+			) X
+			WHERE 1=1
+	</select>
+	
+	<!-- Widget용 Group 조회(개인, 추천, 신규) -->
+	<select id="selectGroupListBycondition" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupListResultMap">
+		SELECT 
+			TSGF.NEW_FEEDCNT,
+			TSGF.ISGROUPMNG,
+			TSGF.ISINVITE,
+			TSGF.JOIN_STATUS,
+			TSGF.INVITOR_ID,
+			TSGF.MEMBER_ID,
+			TSGF.LST_ACCESS_DTTM,
+		    TSG.GROUP_ID,    	<!-- 그룹 아이디 -->
+			TSG.GROUP_NAME,    	<!-- 그룹명 -->
+			TSG.GROUP_IMG_URL, 	<!-- 그룹 이미지 -->
+			TSG.GROUP_TYPE,		<!-- 그룹 타입(0:내부, 1:외부) -->
+			TSG.P_GROUP_ID,    	<!-- 상위 그룹 아이디 -->
+			TSG.DESCRIPTION, 	<!-- 그룹 설명 -->
+			TSG.ISPUBLIC,    	<!-- 공개 여부 -->
+			TSG.ISAUTOJOIN,  	<!-- 자동가입 여부 -->
+			TSG.ISDELETED,   	<!-- 삭제 여부 -->
+			TSG.TARGET_ID,   	<!-- 외부타겟 아이디 -->
+			TSG.TARGET_TYPE, 	<!-- 외부타겟 타입 -->
+			TSG.TENANT_ID,    	<!-- 테넌트 아이디 -->
+			TSG.REGDTTM,		<!-- 등록 일시 -->
+			TSG.REG_MEMBER_ID  <!-- 등록자 아이디 -->
+			
+		FROM ${defaultTablePrefix}GROUP TSG
+			INNER JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSGF.GROUP_ID = TSG.GROUP_ID
+			<if test="memberId == 0">
+     			AND <![CDATA[TSGF.MEMBER_ID <> 0 ]]>
+			</if>
+			<if test="memberId > 0">
+				AND TSGF.MEMBER_ID = #{memberId} AND TSGF.JOIN_STATUS = 'COMPLETE'
+			</if>
+		WHERE TSG.ISDELETED = 0 
+		  AND TSG.ISHIDE = 0
+		<!-- 
+		AND   TSG.ISPUBLIC = #{isPublicGroup}
+		 -->
+		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(regDttm)">
+		AND   TSG.REGDTTM >= ADD_MONTHS(#{regDttm}, -3)
+		</if>
+		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupName)">
+		AND   upper(TSG.GROUP_NAME) LIKE CONCAT('%' , upper(#{groupName}) , '%')
+		</if>
+		ORDER BY TSGF.LST_ACCESS_DTTM DESC, TSG.GROUP_ID
+	</select>
+	
+	<select id="selectGroupListByconditionCnt" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultType="int">
+		SELECT 1 
+	</select>
+	
+	<!-- Group 조회 : 추천그룹 -->
+	<select id="selectGroupListByRecommend" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupListResultMap">
+		SELECT 
+			 GROUP_ID
+			,GROUP_NAME 
+			,GROUP_IMG_URL 
+			,REGDTTM 
+			,REG_MEMBER_ID 
+			,MEMBERCNT 
+			,MEMBER_NAME
+      		,SUM3
+		FROM (
+		
+			SELECT 
+				TT.GROUP_ID 			GROUP_ID,
+		        TT.GROUP_NAME 			GROUP_NAME,
+		        TT.GROUP_IMG_URL 		GROUP_IMG_URL,
+		        TT.REGDTTM 				REGDTTM,
+		        TT.REG_MEMBER_ID 		REG_MEMBER_ID,
+		        COUNT(TSGF.MEMBER_ID) 	MEMBERCNT,
+		        TSM.MEMBER_NAME 		MEMBER_NAME,
+            TT.SUM3
+		    FROM (  
+		    	SELECT 
+		    		COUNT(A.FEED_ID) + SUM(A.SUM1) AS SUM3,
+		            TSG.GROUP_ID,
+		            TSG.GROUP_NAME,
+		            TSG.GROUP_IMG_URL,
+		            TSG.REG_MEMBER_ID,
+		            TSG.REGDTTM 
+		        FROM (  
+		        	SELECT 
+		        		TSF.FEED_ID,
+		                (  IFNULL(TSF.LIKEIT_CNT, 0) + COUNT(TSF2.FEED_ID))  SUM1
+		             FROM ${defaultTablePrefix}FEED TSF, ${defaultTablePrefix}FEED TSF2
+		            WHERE TSF.FEED_TYPE IN ('GENERAL', 'NOTICE', 'TODO', 'SHARE', 'APPROVAL', 'POLL', 'BOARD', 'SHAREPOINT' )
+                      AND TSF.ISDELETED = 0
+                      AND TSF.FEED_ID = TSF2.P_FEED_ID
+		              AND TSF2.FEED_TYPE = 'COMMENT' 
+                      AND TSF2.ISDELETED = 0
+		            GROUP BY TSF.FEED_ID, TSF.LIKEIT_CNT
+		            ) A
+		        	, ${defaultTablePrefix}FOLLOWER TSFL
+		            , ${defaultTablePrefix}GROUP TSG
+                WHERE  TSFL.ITEM_ID = FEED_ID
+		          AND TSFL.ITEM_TYPE = 'FEED'
+		          AND TSFL.FOLLOWER_TYPE = 'GROUP'
+                  AND TSFL.FOLLOWER_ID = TSG.GROUP_ID 
+                  AND TSG.ISHIDE = 0 
+                  AND TSG.ISDELETED = 0 
+                  AND TSG.ISPUBLIC = 1 
+	            GROUP BY 
+	            	TSG.GROUP_ID,
+	                TSG.GROUP_NAME,
+	                TSG.GROUP_IMG_URL,
+	                TSG.REG_MEMBER_ID,
+	                TSG.REGDTTM
+		    ) TT
+		    	INNER JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSGF.GROUP_ID = TT.GROUP_ID
+		        INNER JOIN ${defaultTablePrefix}MEMBER TSM  ON TT.REG_MEMBER_ID  = TSM.MEMBER_ID
+		    GROUP BY 
+		    	TT.SUM3,
+		        TT.GROUP_ID,
+		        TT.GROUP_NAME,
+		        TT.GROUP_IMG_URL,
+		        TT.REG_MEMBER_ID,
+		        TT.REGDTTM,
+		        TSM.MEMBER_NAME
+		    ORDER BY TT.sum3 DESC
+			LIMIT 5
+		) X
+	</select>
+	
+	<select id="selectGroupListByNewCondition" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupListResultMap">
+		SELECT GROUP_ID
+		     , GROUP_NAME
+		     , GROUP_IMG_URL
+		     , P_GROUP_ID
+		     , DESCRIPTION
+		     , ISPUBLIC
+		     , ISAUTOJOIN
+		     , ISDELETED
+		     , TARGET_ID
+		     , TARGET_TYPE
+		     , TENANT_ID
+		     , REGDTTM
+		     , REG_MEMBER_ID
+             , MEMBERCNT as MEMBERCNT
+             , (SELECT MEMBER_NAME FROM ${defaultTablePrefix}MEMBER TSM WHERE REG_MEMBER_ID = TSM.MEMBER_ID) as MEMBER_NAME  
+          FROM (
+				SELECT 
+		                TSG.GROUP_ID,        
+		                TSG.GROUP_NAME,       
+		                TSG.GROUP_IMG_URL,    
+		                TSG.P_GROUP_ID,       
+		                TSG.DESCRIPTION,   
+		                TSG.ISPUBLIC,       
+		                TSG.ISAUTOJOIN,     
+		                TSG.ISDELETED,      
+		                TSG.TARGET_ID,      
+		                TSG.TARGET_TYPE,   
+		                TSG.TENANT_ID,      
+		                TSG.REGDTTM,        
+		                TSG.REG_MEMBER_ID,
+		                COUNT(TSGF.MEMBER_ID) MEMBERCNT
+                  FROM  ${defaultTablePrefix}GROUP TSG, ${defaultTablePrefix}GRPFWL TSGF
+	             WHERE TSGF.GROUP_ID = TSG.GROUP_ID
+	               AND TSG.ISDELETED = 0 
+	               AND TSG.ISPUBLIC = 1
+	               AND TSG.ISHIDE = 0
+	               AND TSG.GROUP_TYPE = '0'
+                   AND TSGF.JOIN_STATUS = 'COMPLETE'
+	             GROUP BY
+	             TSG.GROUP_ID,        
+	                 TSG.GROUP_NAME,       
+	                 TSG.GROUP_IMG_URL,    
+	                 TSG.P_GROUP_ID,       
+	                 TSG.DESCRIPTION,    
+	                 TSG.ISPUBLIC,       
+	                 TSG.ISAUTOJOIN,      
+	                 TSG.ISDELETED,       
+	                 TSG.TARGET_ID,       
+	                 TSG.TARGET_TYPE,     
+	                 TSG.TENANT_ID,        
+	                 TSG.REGDTTM,     
+	                 TSG.REG_MEMBER_ID
+                 ORDER BY 
+                <if test="cType!= null and cType == 'recommend'">
+                	MEMBERCNT DESC,
+                </if>
+                 GROUP_ID DESC
+         		 LIMIT 5
+                ) X
+	</select>
+	
+	<!-- 전체 Group 조회 -->
+	<select id="selectGroupList" resultMap="groupListResultMap">
+		SELECT 
+		
+			TSG.GROUP_ID,    	<!-- 그룹 아이디 -->
+			TSG.GROUP_NAME,    	<!-- 그룹명 -->
+			TSG.GROUP_IMG_URL, 	<!-- 그룹 이미지 -->
+			TSG.P_GROUP_ID,    	<!-- 상위 그룹 아이디 -->
+			TSG.DESCRIPTION, 	<!-- 그룹 설명 -->
+			TSG.ISPUBLIC,    	<!-- 공개 여부 -->
+			TSG.ISAUTOJOIN,  	<!-- 자동가입 여부 -->
+			TSG.ISDELETED,   	<!-- 삭제 여부 -->
+			TSG.TARGET_ID,   	<!-- 외부타겟 아이디 -->
+			TSG.TARGET_TYPE, 	<!-- 외부타겟 타입 -->
+			TSG.TENANT_ID,    	<!-- 테넌트 아이디 -->
+			TSG.REGDTTM,		<!-- 등록 일시 -->
+			TSG.REG_MEMBER_ID,  <!-- 등록자 아이디 -->
+			TSGF.NEW_FEEDCNT,
+			TSGF.ISGROUPMNG,
+			TSGF.ISINVITE
+		FROM ${defaultTablePrefix}GROUP TSG
+			LEFT OUTER JOIN ${defaultTablePrefix}KNWLDG TSK  ON TSK.GROUP_ID = TSG.GROUP_ID
+			LEFT OUTER JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSGF.GROUP_ID = TSG.GROUP_ID
+		WHERE TSG.ISDELETED = 0
+		  AND TSG.ISHIDE = 0
+		ORDER BY TSG.GROUP_ID
+	</select>
+	
+	<!-- 단건의 Group 조회 -->
+	<select id="selectGroupById" parameterType="long" resultMap="groupListResultMap">
+		SELECT 
+		
+			TSG.GROUP_ID,    	<!-- 그룹 아이디 -->
+			TSG.GROUP_NAME,    	<!-- 그룹명 -->
+			TSG.GROUP_IMG_URL, 	<!-- 그룹 이미지 -->
+			TSG.P_GROUP_ID,    	<!-- 상위 그룹 아이디 -->
+			TSG.DESCRIPTION, 	<!-- 그룹 설명 -->
+			TSG.ISPUBLIC,    	<!-- 공개 여부 -->
+			TSG.ISAUTOJOIN,  	<!-- 자동가입 여부 -->
+			TSG.ISDELETED,   	<!-- 삭제 여부 -->
+			TSG.TARGET_ID,   	<!-- 외부타겟 아이디 -->
+			TSG.TARGET_TYPE, 	<!-- 외부타겟 타입 -->
+			TSG.TENANT_ID,    	<!-- 테넌트 아이디 -->
+			TSG.REGDTTM,		<!-- 등록 일시 -->
+			TSG.REG_MEMBER_ID,  <!-- 등록자 아이디 -->
+			TSG.GROUP_TYPE,
+			TSG.FILE_REPO_ID,
+			(SELECT COUNT(*) FROM ${defaultTablePrefix}GRPFWL TSGR WHERE TSGR.GROUP_ID = TSG.GROUP_ID AND TSGR.JOIN_STATUS = 'COMPLETE') AS MEMBERCNT
+		FROM ${defaultTablePrefix}GROUP TSG
+		WHERE TSG.ISDELETED = 0
+		AND   TSG.GROUP_ID = #{groupId}
+	</select>
+	
+	<select id="selectGroupBySynckey" parameterType="String" resultMap="groupListResultMap">
+		SELECT 
+			TSGF.NEW_FEEDCNT,
+			TSGF.ISGROUPMNG,
+			TSGF.ISINVITE,
+			TSGF.JOIN_STATUS,
+			TSGF.INVITOR_ID,
+			TSGF.MEMBER_ID,
+			TSGF.LST_ACCESS_DTTM,
+		    TSG.GROUP_ID,    	<!-- 그룹 아이디 -->
+			TSG.GROUP_NAME,    	<!-- 그룹명 -->
+			TSG.GROUP_IMG_URL, 	<!-- 그룹 이미지 -->
+			TSG.GROUP_TYPE,		<!-- 그룹 타입(0:내부, 1:외부) -->
+			TSG.P_GROUP_ID,    	<!-- 상위 그룹 아이디 -->
+			TSG.DESCRIPTION, 	<!-- 그룹 설명 -->
+			TSG.ISPUBLIC,    	<!-- 공개 여부 -->
+			TSG.ISAUTOJOIN,  	<!-- 자동가입 여부 -->
+			TSG.ISDELETED,   	<!-- 삭제 여부 -->
+			TSG.TARGET_ID,   	<!-- 외부타겟 아이디 -->
+			TSG.TARGET_TYPE, 	<!-- 외부타겟 타입 -->
+			TSG.TENANT_ID,    	<!-- 테넌트 아이디 -->
+			TSG.REGDTTM,		<!-- 등록 일시 -->
+			TSG.REG_MEMBER_ID   <!-- 등록자 아이디 -->
+			
+		FROM ${defaultTablePrefix}GROUP TSG
+			INNER JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSGF.GROUP_ID = TSG.GROUP_ID
+				AND TSGF.MEMBER_ID = (SELECT MEMBER_ID FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY=#{userId})
+				AND TSGF.JOIN_STATUS = 'COMPLETE'
+		WHERE TSG.ISDELETED = 0 
+		  AND TSG.ISHIDE = 0
+		ORDER BY TSGF.LST_ACCESS_DTTM DESC, TSG.GROUP_ID
+	</select>
+	
+	<select id="selectGroupByGroupName" parameterType="org.uengine.sns.common.util.vo.SearchContextVo" resultMap="groupNameChkResult">
+		SELECT 
+			GROUP_NAME
+		FROM ${defaultTablePrefix}GROUP TSG
+		WHERE 1=1
+		  AND GROUP_NAME = #{groupName, jdbcType=VARCHAR}
+		  AND TSG.ISDELETED = 0 
+		  AND TSG.ISHIDE = 0
+		GROUP BY GROUP_NAME
+	</select>
+	
+	<!-- Group 추가 -->	
+	<insert id="insertGroup" parameterType="org.uengine.sns.group.vo.GroupVo">
+		INSERT INTO	${defaultTablePrefix}GROUP 
+			(
+			 GROUP_NAME,    <!-- 그룹명 -->
+			 GROUP_IMG_URL, <!-- 그룹 이미지 -->
+			 P_GROUP_ID,    <!-- 상위 그룹 아이디 -->
+			 GROUP_TYPE,
+			 DESCRIPTION,   <!-- 그룹 설명 -->
+			 ISPUBLIC,      <!-- 공개 여부 -->
+			 ISAUTOJOIN,    <!-- 자동가입 여부 -->
+			 ISHIDE,    	<!-- 숨김 여부 -->
+			 ISDELETED,     <!-- 삭제 여부 -->
+			 TARGET_ID,     <!-- 외부타겟 아이디 -->
+			 TARGET_TYPE,   <!-- 외부타겟 타입 -->
+			 TENANT_ID,     <!-- 테넌트 아이디 -->
+			 REGDTTM,		<!-- 등록 일시 -->
+			 REG_MEMBER_ID,  <!-- 등록자 아이디 -->
+			 FILE_REPO_ID
+	        ) 
+	        VALUES
+	        ( 
+	         #{groupName, 	jdbcType=VARCHAR}, 
+	         #{groupImgUrl, jdbcType=VARCHAR},
+	         0, 
+	         #{groupType, 	jdbcType=VARCHAR},
+	         #{description, jdbcType=VARCHAR}, 
+	         #{isPublic}, 
+	         #{isAutoJoin}, 
+	         #{isHide},
+	         0,  	 	
+			 #{targetId, 	jdbcType=VARCHAR}, 
+			 #{targetType, 	jdbcType=VARCHAR}, 
+			 #{tenantId},
+			 #{regDttm}, 
+			 #{regMemberId},	
+			 #{fileRepoId, 	jdbcType=VARCHAR} 
+	 		 )	
+			<selectKey keyProperty="groupId" resultType="long" order="AFTER">
+				SELECT last_insert_id()
+			</selectKey>
+	</insert>
+    
+	<!-- Group 갱신 -->
+	<update id="updateGroup" parameterType="org.uengine.sns.group.vo.GroupVo">
+    	UPDATE ${defaultTablePrefix}GROUP 
+    	   SET MODIFY_DTTM = now()
+    		<if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupName)">
+		    	,GROUP_NAME = #{groupName}	 	 <!-- 그룹 명 -->
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(groupImgUrl)">
+		    	,GROUP_IMG_URL = #{groupImgUrl}	 <!-- 그룹 이미지 -->
+		    </if>
+		    <if test="pGroupId > 0">
+		    	,P_GROUP_ID = #{pGroupId}	 	 <!-- 상위 그릅 아이디 -->
+		    </if>
+		    <if test="@org.apache.commons.lang.StringUtils@isNotEmpty(description)">
+				,DESCRIPTION= #{description} 	 <!-- 그룹 설명 -->
+			</if>
+			<if test="isPublic > -1">
+				,ISPUBLIC= #{isPublic}	     	 <!-- 공개 여부 -->
+			</if>
+			<if test="isAutoJoin > -1">
+				,ISAUTOJOIN= #{isAutoJoin}	     <!-- 자동 가입 여부 -->
+			</if>
+		    <if test="isDeleted > -1">       
+				,ISDELETED= #{isDeleted}	 	 <!-- 삭제 여부	-->
+			</if>
+		    <if test="targetId != null">  
+				,TARGET_ID= #{targetId}		 	 <!-- 외부타겟 아이디 --> 
+			</if>
+			<if test="targetType != null">
+				,TARGET_TYPE= #{targetType}  	 <!-- 외부타겟 타입 -->
+			</if>
+		    <if test="tenantId > 0 ">      
+				,TENANT_ID= #{tenantId}			 <!-- 테넌트 아이디 -->
+			</if>
+			<if test="fileRepoId != null">   
+				,FILE_REPO_ID = #{fileRepoId}
+			</if>
+    	WHERE GROUP_ID = #{groupId}
+	</update>
+    
+	<!-- Group 삭제 -->
+	<update id="deleteGroup" parameterType="long">
+    	UPDATE ${defaultTablePrefix}GROUP
+    	   SET ISDELETED = 1,
+    	       MODIFY_DTTM = now() 
+    	 WHERE GROUP_ID = #{groupId}
+	</update>
+    
+	<!-- Group 목록 삭제 -->
+	<update id="deleteGroupList" parameterType="map">
+		UPDATE ${defaultTablePrefix}GROUP
+		    SET ISDELETED = 1,
+    	        MODIFY_DTTM = now()
+		WHERE GROUP_ID IN 
+		<foreach item="list" index="index" collection="groupList" open="(" separator="," close=")"> 
+			#{list.groupId}
+		</foreach>
+	</update>
+
+</mapper>

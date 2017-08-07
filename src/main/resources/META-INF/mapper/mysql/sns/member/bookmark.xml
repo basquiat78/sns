@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.member.mapper.BookmarkMapper">
+
+	<resultMap id="bookmarkResultMap" type="org.uengine.sns.member.vo.BookmarkVo">
+		<result property="memberId"	column="MEMBER_ID"/>
+		<result property="feedId" 	column="FEED_ID"/>
+	</resultMap>
+
+	<!-- 멤버별 BOOKMARK LIST 조회 -->
+	<select id="selectBookmarkList" parameterType="long" resultMap="bookmarkResultMap">
+		SELECT 
+			 MEMBER_ID,	
+			 FEED_ID
+		FROM ${defaultTablePrefix}BOOKMARK
+		WHERE MEMBER_ID = #{memberId}
+		ORDER BY FEED_ID DESC
+	</select>
+	
+	<!-- 피드별 BOOKMARK LIST 조회 -->
+	<select id="selectBookmarkListByFeed" parameterType="long" resultMap="bookmarkResultMap">
+		SELECT 
+			 MEMBER_ID,	
+			 FEED_ID
+		FROM ${defaultTablePrefix}BOOKMARK
+		WHERE FEED_ID = #{feedId}
+		ORDER BY FEED_ID DESC
+	</select>
+
+	<!-- BOOKMARK 등록 -->
+	<insert id="insertBookmark" parameterType="org.uengine.sns.member.vo.BookmarkVo" >
+        INSERT INTO ${defaultTablePrefix}BOOKMARK(MEMBER_ID, FEED_ID) VALUES (#{memberId}, #{feedId})
+	</insert>
+	
+	<!-- BOOKMARK 삭제 -->
+	<delete id="deleteBookmark" parameterType="org.uengine.sns.member.vo.BookmarkVo">
+		DELETE FROM ${defaultTablePrefix}BOOKMARK WHERE MEMBER_ID = #{memberId} AND FEED_ID = #{feedId}
+	</delete>
+	
+</mapper>

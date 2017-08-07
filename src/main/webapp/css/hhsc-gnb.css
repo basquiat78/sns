@@ -1,0 +1,190 @@
+/*==================================================================================
+ UI & design consuting - FOR C&C (주)에프오알씨앤씨 - UI Creative Team 
+www.forcnc.co.kr  / (02)322-0637
+==================================================================================*/
+
+/* z-index */
+.hhsc-gnb-lay-top,
+.hhsc-connector-info {position:relative;z-index:2;}
+.hhsc-gnb-lay-bottom {z-index:1;}
+
+.hhsc-gnb {height:100px;box-sizing:border-box;margin:0 20px;border-bottom:2px solid #737171;position:relative;}
+.hhsc-gnb ul {padding-left:0;margin:0;list-style:none;}
+.hhsc-gnb p {margin:0;}
+
+
+/*=================================================
+GNB 상단영역
+=================================================*/
+.hhsc-gnb-lay-top {height:50px;}
+
+/* Logo */
+.hhsc-logo-area {float:left;width:170px;height:35px;margin:0;padding-top:14px;}
+.hhsc-logo {text-indent:-10000px;display:block;width:170px;height:35px;cursor:pointer;background:url(../images/common/logo_gnb.png) no-repeat;} 
+
+/* 퀵메뉴 */
+.hhsc-nav-util {white-space:nowrap;float:right;padding-top:14px;margin-bottom:25px;}
+.hhsc-nav-util-item {display:inline;margin-left:8px;}
+.hhsc-nav-util-anchor {font-size:12px;color:#999;line-height:1.4em;}
+.hhsc-nav-util-anchor:hover {text-decoration:underline;}
+.hhsc-util-layer-admin {display:inline;position:relative;}
+.hhsc-util-layer-admin .hhsc-bu {display:inline-block;width:9px;height:9px;margin-left:3px;background:url(../images/common/lay_gnb.png) -200px -150px;}
+.hhsc-util-layer-admin.hhsc-active .hhsc-bu {background-position:-250px -150px;}
+.hhsc-util-layerbox {position:absolute;right:0;display:none;}
+
+/* 통합검색 */
+.hhsc-search-unified {position:absolute;width:330px;top:15px;left:50%;margin-left:-165px;}
+.hhsc-search-keyword[type=search] {color:#716f6f;font-size:12px;width:290px;height:32px;border:1px solid #e0e0e0;box-sizing:border-box;vertical-align:top;outline:none;padding-left:11px;padding-right:35px;}
+/* 자동완성 */
+.hhsc-search-autocomplete {position:relative;width:290px;display:none;}
+.hhsc-search-autocomplete.hhsc-active {display:block;}
+.hhsc-button-autocomplete {position:absolute;top:-32px;right:0;cursor:pointer;}
+.hhsc-search-autocomplete-footer {text-align:right;border:1px solid #d8d8d8;border-top-width:0;padding:6px 7px 7px;background-color:#f0efef;}
+.hhsc-search-autocomplete-footer .hhsc-search-autocomplete-anchor {font-size:12px;color:#8c8c8c;}
+
+/* 레이어 리스트 */
+.hhsc-layer-list {border:1px solid #d8d8d8;border-top-width:0;margin:-1px 0 0;padding:0px;max-height:150px;overflow:auto;overflow-y:auto;z-index:10;background-color:#FFF;}
+.hhsc-layer-anchor {color:#4f4f4f;font-size:12px;display:block;padding:7px 13px;text-decoration:none;background-color:#FFF;}
+.hhsc-layer-anchor:hover,
+.hhsc-layer-anchor.hhsc-selected {font-weight:bold;background:#f1f1f1;}
+
+
+/*=================================================
+GNB 하단영역
+=================================================*/
+.hhsc-gnb-lay-bottom {height:48px;position:relative;}
+
+/* GNB Menu */
+.hhsc-gnb .hhsc-nav-gnb {float:left;overflow:hidden;margin-bottom:-2px;}
+.hhsc-gnb-item {text-align:left;padding:0 42px 0 0;float:left;margin-left:1px;}
+.hhsc-gnb-item:first-child {margin-left:0;}
+.hhsc-gnb-anchor {font-size:18px;color:#2d2928;line-height:1.4em;display:block;padding:15px 0 12px;height:50px;box-sizing:border-box;border-bottom:4px solid transparent;}
+.hhsc-gnb-anchor:active {background:none;}
+.hhsc-gnb-anchor:hover,
+.hhsc-active .hhsc-gnb-anchor {color:#fa7723;border-bottom-color:#fa7723;padding-bottom:9px;}
+
+/* 접속자 정보 */
+.hhsc-gnb-connect-data {float:right;}
+.hhsc-connector-layerbox {position:absolute;width:180px;display:none;}
+.hhsc-connector-layerbox .hhsc-layer-list {border:1px solid #a6a6a6;margin-top:-1px;}
+.hhsc-connector-layerbox .hhsc-layer-item {}
+.hhsc-connector-layerbox .hhsc-layer-item-num {color:#fff;padding:0px 10px;position:absolute;right:13px;border-radius:8px;background-color:#ff5722;}
+.hhsc-layer-anchor:hover .hhsc-layer-item-num {font-weight:normal;}
+.hhsc-connector-layerbox .hhsc-bu-pointer {position:relative;height:16px;display:block;background:url(../images/common/bu_layer_pointer.png) bottom no-repeat;}
+
+/* 접속자 Info */
+.hhsc-connector-info {float:left;}
+.hhsc-connector-pic {position:relative;display:inline-block;width:30px;margin-right:6px;}
+.hhsc-connector-pic .hhsc-connector-img {display:block;width:30px;height:30px;border-radius:50%;overflow:hidden;}
+.hhsc-connector-pic .hhsc-connector-img img {width:100%;}
+.hhsc-connector-data {display:inline-block;vertical-align:top;white-space:nowrap;margin-right:5px;}
+.hhsc-data-user {display:inline;}
+.hhsc-data-belong {display:block;}
+.hhsc-data-user {font-size:12px;color:#313131;font-weight:bold;line-height:1.4em;}
+.hhsc-data-belong {font-size:11px;color:#808080;}
+.hhsc-connector-info .hhsc-bu {display:inline-block;width:12px;height:12px;margin-left:3px;background:url(../images/common/lay_gnb.png) 0 -150px;}
+.hhsc-connector-info.hhsc-active .hhsc-bu {background-position:-50px -150px;}
+.hhsc-ico-logout {vertical-align:top;}
+/* 접속자 맞춤 메뉴 */
+.hhsc-connector-menu {float:left;margin-left:20px;}
+.hhsc-connector-menu-box {display:inline-block;vertical-align:top;}
+.hhsc-connector-menu-anchor {display:inline-block;cursor:pointer;position:relative;}
+.hhsc-connector-menu-anchor .hhsc-push {color:#FFF;font-size:11px;text-align:center;display:block;position:absolute;right:-2px;top:-2px;min-width:16px;height:16px;border-radius:15px;box-sizing:border-box;background-color:#ff290d;padding:0 6px;}
+.hhsc-bu-layermenu {text-indent:-10000px;overflow:hidden;display:none;width:14px;height:8px;position:absolute;top:42px;left:8px;background:url(../images/common/lay_gnb.png) -150px -150px;}
+.hhsc-connector-menu-box.hhsc-active .hhsc-ico-img {background-color:#7f756f}
+.hhsc-connector-menu-box.hhsc-active .hhsc-bu-layermenu {display:block;}
+/* 관리자메뉴 */
+.hhsc-util-layerbox {position:absolute;width:160px;}
+.hhsc-util-layerbox .hhsc-layer-list {border:1px solid #a6a6a6;margin-top:-1px;max-height:none;}
+.hhsc-util-layerbox .hhsc-bu-pointer {position:relative;height:14px;display:block;background:url(../images/common/bu_layer_pointer.png) 120px bottom no-repeat;}
+
+/* 레이어메뉴 레이아웃 */
+.hhsc-connector-menu-layer {position:absolute;width:100%;top:50px;left:0;padding:20px 0;border-bottom:1px solid #737171;display:none;background-color:#FFF;}
+.hhsc-connector-menu .hhsc-layer-container {display:table;width:100%;}
+.hhsc-connector-menu .hhsc-layer-header {width:200px;padding:0 20px;display:table-cell;vertical-align:top;border-right:1px solid #e0e0e0;}
+.hhsc-connector-menu .hhsc-layer-title {color:#fe630f;font-size:30px;line-height:1.33em;vertical-align:top;margin-bottom:8px;}
+.hhsc-connector-menu .hhsc-layer-description {color:#999;font-size:12px;line-height:1.33em;margin-bottom:15px;}
+.hhsc-connector-menu .hhsc-layer-btn-area .hhsc-btn {color:#FFF;font-size:12px;line-height:1.33em;font-weight:bold;text-align:center;display:block;margin-bottom:5px;padding:8px 10px 9px;box-sizing: border-box;height:32px;border-radius:16px;}
+.hhsc-connector-menu .hhsc-layer-btn-area .hhsc-btn-attention {background-color:#fe630f;}
+.hhsc-connector-menu .hhsc-layer-btn-area .hhsc-btn-default {background-color:#bfbab7;}
+.hhsc-connector-menu .hhsc-layer-contents {display:table-cell;}
+.hhsc-connector-menu .hhsc-layer-contents .hhsc-layer-contents-scroll {padding:0 20px;}
+.hhsc-connector-menu .hhsc-layer-contents-title {font-size:20px;color:#2d2928;line-height:1.33em;padding:10px 0;}
+.hhsc-connector-menu .hhsc-layer-aside {display:table-cell;width:300px;border-left:1px solid #e0e0e0;vertical-align:top;}
+.hhsc-connector-menu .hhsc-layer-contents-scroll {overflow:auto;}
+.hhsc-connector-menu .hhsc-layer-aside .hhsc-systemlink{margin-top:2px;}
+/* Quick - Favorite Link */
+.hhsc-connector-systemlink .hhsc-layer-contents-scroll {max-height:257px;}
+.hhsc-connector-menu .hhsc-favoritelink {margin-left:-15px;}
+.hhsc-favoritelink .hhsc-favoritelink-item {display:inline-block;vertical-align:top;position:relative;width:170px;margin:0 15px;padding:4px 0;}
+.hhsc-favoritelink .hhsc-favoritelink-anchor {font-size:12px;color:#2d2928;}
+.hhsc-favoritelink .hhsc-favoritelink-item:hover .hhsc-ico-anchor {display:block;}
+.hhsc-favoritelink .hhsc-ico-anchor {position:absolute;right:0;top:3px;display:none;}
+.hhsc-favoritelink .hhsc-favoritelink-anchor:hover {color:#fe630f;}
+/* Quick - Systemlink */
+.hhsc-systemlink-item {display:inline-block;width:33.33%;margin-right:-4px;margin-bottom:12px;vertical-align:top;}
+.hhsc-systemlink-anchor {display:block;margin:0 5px;}
+.hhsc-systemlink-ico {display:block;width:56px;height:51px;margin:0 auto;background-image:url(../images/common/ico_systemlink.png);}
+.hhsc-systemlink-hwtalktalk {background-position:0 0;}
+.hhsc-systemlink-ehrd {background-position:-80px 0;}
+.hhsc-systemlink-etax {background-position:-160px 0;}
+.hhsc-systemlink-uhr {background-position:0 -80px;}
+.hhsc-systemlink-itsm {background-position:-80px -80px;}
+.hhsc-systemlink-sncsite {background-position:-160px -80px;}
+.hhsc-systemlink-oneplus {background-position:0 -160px;}
+.hhsc-systemlink-knowledgeplus {background-position:-80px -160px;}
+.hhsc-systemlink-smartcrm {background-position:-160px -160px;}
+.hhsc-systemlink-namecard{background-position:0 -240px;}
+.hhsc-systemlink-bigdata{background-position:-80px -240px;}
+.hhsc-systemlink-visitormanage{background-position:-160px -240px;}
+.hhsc-systemlink-itam{background-position:0 -320px;}
+.hhsc-systemlink-businessfb{background-position:-80px -320px;}
+.hhsc-systemlink-eaglepms{background-position:-160px -320px;}
+.hhsc-systemlink-smarterp{background-position:0 -400px;}
+.hhsc-systemlink-ezwel{background-position:-80px -400px;}
+.hhsc-systemlink-name{font-size:12px;color:#7f756f;line-height:1.33em;font-weight:bold;text-align:center;padding:6px 0;}
+/* Quick - Social Alarm List */
+.hhsc-connector-social .hhsc-layer-contents-scroll {max-height:180px;}
+.hhsc-sociallist {}
+.hhsc-sociallist-item {width:210px;padding-top:10px;padding-right:20px;display:inline-block;margin-right:-4px;margin-bottom:12px;position:relative;vertical-align:top;}
+.hhsc-sociallist .hhsc-user-pic {width:36px;height:36px;border-radius:50%;float:left;overflow:hidden;}
+.hhsc-sociallist .hhsc-user-pic img {width:100%;}
+.hhsc-social-info .hhsc-user {font-weight:bold;}
+.hhsc-sociallist .hhsc-social-info,
+.hhsc-sociallist .hhsc-date {margin-left:46px;}
+.hhsc-sociallist .hhsc-social-info {color:#4c4c4c;font-size:12px;line-height:1.4em;margin-bottom:5px;}
+.hhsc-sociallist .hhsc-date {color:#999;font-size:12px;line-height:1.33em;}
+.hhsc-sociallist .hhsc-ico-anchor {position:absolute;top:0;right:20px;display:none;}
+.hhsc-sociallist-item:hover .hhsc-ico-anchor {display:block;}
+/* Quick - Approval List */
+.hhsc-connector-approval .hhsc-layer-contents-scroll {max-height:180px;}
+.hhsc-approvallist {}
+.hhsc-approvallist-item {width:210px;padding-top:10px;padding-right:20px;display:inline-block;margin-right:-4px;margin-bottom:12px;position:relative;vertical-align:top;}
+.hhsc-approvallist .hhsc-approval-index {font-size:12px;line-height:1.33em;margin-bottom:3px;}
+.hhsc-approval-will {color:#fe630f;}
+.hhsc-approval-progress {color:#03a2e4;}
+.hhsc-approval-schedule {color:#fe630f;}
+.hhsc-list-title {margin-bottom:6px;}
+.hhsc-approvallist .hhsc-list-anchor {font-size:13px;color:#040404;line-height:1.4em;}
+.hhsc-approvallist .hhsc-list-data-default {margin-bottom:6px;}
+.hhsc-approvallist .hhsc-list-data-attr {color:#999;font-size:12px;line-height:1.33em;}
+.hhsc-approvallist .hhsc-data-value {color:#393939;margin-left:3px;}
+.hhsc-approvallist .hhsc-data-writer {color:#1c1c1c;font-size:12px;margin-right:10px;margin-bottom:4px;}
+.hhsc-approvallist .hhsc-data-doclevel-attr {color:#999;font-size:12px;}
+.hhsc-approvallist .hhsc-value-default {color:#1c1c1c;}
+.hhsc-approvallist .hhsc-value-important {color:#fe630f;}
+.hhsc-approvallist .hhsc-data-delay {font-size:12px;color:#fe2b0f;}
+.hhsc-approvallist .hhsc-ico-anchor {position:absolute;top:0;right:20px;display:none;}
+.hhsc-approvallist-item:hover .hhsc-ico-anchor {display:block;}
+
+
+/*=================================================
+Icon
+=================================================*/
+.hhsc-ico-img {text-indent:-10000px;overflow:hidden;background-image:url(../images/common/lay_gnb.png);}
+.hhsc-ico-search {border:0;width:40px;height:32px;box-sizing:border-box;cursor:pointer;outline:none; border:0;padding:0;background-color:#fa7723;margin-left:-5px;background-position:-100px -50px;}
+.hhsc-ico-folding {display:block;width:35px;height:30px;background-position:0 -50px;}/* 자동완성 버튼 */
+.hhsc-ico-approval {display:inline-block;width:30px;height:30px;border-radius:50%;background-position:0px -100px;background-color:#cacccb;}
+.hhsc-ico-social {display:inline-block;width:30px;height:30px;border-radius:50%;background-position:-50px -100px;background-color:#cacccb;}
+.hhsc-ico-systemlink {display:inline-block;width:30px;height:30px;border-radius:50%;background-position:-100px -100px;background-color:#cacccb;}
+.hhsc-ico-delete {display:inline-block;width:20px;height:20px;border-radius:50%;background-position:-100px -150px;background-color:#bfbfbf;}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.openapi.mapper.GroupWareMapper">
+	
+	<!-- Mapping resultMap -->
+	<resultMap id="groupWareSloMap" type="org.uengine.sns.openapi.vo.GroupWareSloVo">
+		<id property="userId"			column="USER_ID"/>
+		<result property="loginDate"	column="LOGIN_DATE"/>
+	</resultMap>
+	
+	<select id="selectSloSeedByOtaId" parameterType="String" resultType="String">
+		SELECT 
+			 SEED 
+			FROM SLO_OTACRYPT 
+			WHERE ENCID = #{value}
+	</select>
+	
+	<select id="selectSloInfoByDecryptOtaId" parameterType="String" resultMap="groupWareSloMap">
+		SELECT 
+			 MAX(LOGIN_DATE) AS LOGIN_DATE,
+			 USER_ID
+			FROM TB_ACL_LOGIN
+			WHERE USER_ID = (SELECT SYSID
+		                   		FROM SLO_OTA
+		                  		WHERE OTAID = #{value}
+		                    	  AND USED = 'N' )
+			  AND LOGIN_TYPE LIKE '%MOBILE%'
+			GROUP BY USER_ID
+	</select>
+	
+	<update id="updateUserLoginDate" parameterType="String">
+		UPDATE TB_ACL_LOGIN
+		   SET LOGIN_DATE = SYSDATE
+		 WHERE USER_ID = #{value}
+	</update>
+
+</mapper>

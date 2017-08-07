@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.uengine.sns.feed.mapper.FollowerMapper">
+
+	<resultMap id="followerResultMap" type="org.uengine.sns.feed.vo.FollowerVo">
+		<id property="itemId" 			column="ITEM_ID" />
+		<result property="followerId" 	column="FOLLOWER_ID"/>
+		<result property="itemType" 	column="ITEM_TYPE"/>
+		<result property="followerType" column="FOLLOWER_TYPE"/>
+		<result property="regMemberId" 	column="REG_MEMBER_ID"/>
+		<result property="regDttm" 		column="REGDTTM"/>
+	</resultMap>
+	
+	<!-- 팔로워 autocomplete을 위한 멤버 정보 followerVo에 매핑 -->
+	<resultMap id="memberListForAutoResultMap" type="org.uengine.sns.feed.vo.FollowerVo">
+		<result property="followerId" 	 	 		column="FOLLOWER_ID"/>
+		<result property="followerMemberSyncKey"	column="SYNC_KEY"/>
+		<result property="followerType"    	 		column="FOLLOWER_TYPE"/>
+		<result property="followerName"    	 		column="FOLLOWER_NAME"/>
+		<result property="followerImgUrl"  	 		column="FOLLOWER_IMG_URL"/>
+		<result property="followerEmail"   	 		column="FOLLOWER_EMAIL"/>
+		<result property="followerPosition"    		column="FOLLOWER_POSITION"/>
+		<result property="followerDescription" 		column="FOLLOWER_DESCRIPTION"/>
+	</resultMap>
+	
+	<!-- 팔로워 툴팁을 위한 정보 세팅 (멤버)-->
+	<resultMap id="fMemberInfoResultMap" type="org.uengine.sns.feed.vo.FollowerInfoVo">
+		<result property="followerId" 		column="FOLLOWER_ID"/>
+		<result property="followerName" 	column="FOLLOWER_NAME"/>
+		<result property="followerType" 	column="FOLLOWER_TYPE"/>
+		<result property="followerPicUrl" 	column="FOLLOWER_PIC_URL"/>
+		<result property="followerThumbUrl"	column="FOLLOWER_THUMB_URL"/>
+		<collection property="groupList" 			javaType="java.util.ArrayList" resultMap="ffGroupMap" />
+		<collection property="followerMappingInfo"	javaType="java.util.ArrayList" resultMap="ffMappingMap" />
+	</resultMap>
+	
+	<!-- 팔로워 툴팁을 위한 정보 세팅 (그룹)-->
+	<resultMap id="fGroupInfoResultMap" type="org.uengine.sns.feed.vo.FollowerInfoVo">
+		<result property="followerId" 		column="FOLLOWER_ID"/>
+		<result property="followerName" 	column="FOLLOWER_NAME"/>
+		<result property="followerType" 	column="FOLLOWER_TYPE"/>
+		<result property="followerPicUrl"	column="FOLLOWER_PIC_URL"/>
+		<result property="description" 	 	column="DESCRIPTION"/>
+		<collection property="groupFollowerList"	javaType="java.util.ArrayList" resultMap="ffMemberMap" />	
+	</resultMap>
+	
+	<!-- 멤버 정보  -->
+	<resultMap id="ffMemberMap" type="org.uengine.sns.member.vo.MemberVo">
+		<result property="memberId"        column="MEMBER_ID"/>
+		<result property="memberName"      column="MEMBER_NAME"/>
+		<result property="memberPicUrl"    column="MEMBER_PIC_URL"/>
+		<result property="memberThumbUrl"  column="MEMBER_THUMB_URL"/>
+	</resultMap>
+		
+	<!-- 그룹 정보  -->
+	<resultMap id="ffGroupMap" type="org.uengine.sns.group.vo.GroupVo">
+		<result property="groupId"       column="GROUP_ID"/>
+		<result property="groupName"     column="GROUP_NAME"/>
+		<result property="groupImgUrl"   column="GROUP_IMG_URL"/>
+		<result property="description"   column="DESCRIPTION"/>
+	</resultMap>
+	
+	<!-- 멤버 매핑 정보  -->
+	<resultMap id="ffMappingMap" type="org.uengine.sns.tenant.vo.UserTenantMappingVo">
+		<result property="partName" 	 column="PART_NAME"/>
+		<result property="positionName"  column="POSITION_NAME"/>
+		<result property="dutyName" 	 column="DUTY_NAME"/>
+	</resultMap>
+	
+	<!-- 팔로워 autocomplete을 위한 그룹 정보 followerVo에 매핑 -->
+	<resultMap id="groupListForAutoResultMap" type="org.uengine.sns.feed.vo.FollowerVo">
+		<result property="itemId" 		 		column="ITEM_ID"/>
+		<result property="itemType" 		 	column="ITEM_TYPE"/>
+		<result property="followerId" 	 		column="FOLLOWER_ID"/>
+		<result property="followerType"    		column="FOLLOWER_TYPE"/>
+		<result property="followerName"    		column="FOLLOWER_NAME"/>
+		<result property="followerImgUrl"  		column="FOLLOWER_IMG_URL"/>
+		<result property="followerDescription" 	column="FOLLOWER_DESCRIPTION"/>
+	</resultMap>
+	
+	<!-- FEED FOLLOWER 조회 -->
+	<select id="selectFollowerList" parameterType="string" resultMap="followerResultMap">
+		SELECT 
+			  ITEM_ID
+			 ,FOLLOWER_ID
+			 ,ITEM_TYPE
+			 ,FOLLOWER_TYPE
+			 ,REG_MEMBER_ID
+			 ,REGDTTM
+		FROM  ${defaultTablePrefix}FOLLOWER 
+		WHERE 1 = 1
+		<if test="itemId != null">
+			AND   ITEM_ID 	  = #{itemId}
+		</if>
+		<if test="itemType != null">
+			AND	  ITEM_TYPE   = #{itemType}
+		</if>
+		<if test="followerId != null">
+        	AND FOLLOWER_ID   = #{followerId}
+        </if>     
+        <if test="followerType != null">
+        	AND FOLLOWER_TYPE = #{followerType}
+        </if>
+	</select>
+	
+	<!-- FEED FOLLOWER 조회 -->
+	<select id="selectFollowerDataList" parameterType="map" resultMap="followerResultMap">
+		SELECT 
+			  ITEM_ID
+			 ,FOLLOWER_ID
+			 ,ITEM_TYPE
+			 ,FOLLOWER_TYPE
+			 ,REG_MEMBER_ID
+			 ,REGDTTM
+		FROM  ${defaultTablePrefix}FOLLOWER 
+		WHERE 1 = 1
+		<if test="itemId != null">
+			AND   ITEM_ID 	  = #{itemId}
+		</if>
+		<if test="itemType != null">
+			AND	  ITEM_TYPE   = #{itemType}
+		</if>
+		<if test="followerId != null">
+        	AND FOLLOWER_ID   = #{followerId}
+        </if>     
+        <if test="followerType != null">
+        	AND FOLLOWER_TYPE = #{followerType}
+        </if>
+	</select>
+	
+	<!-- FEED FOLLOWER 조회 -->
+	<select id="selectFeedFollower" parameterType="long" resultMap="followerResultMap">
+		SELECT 
+			  ITEM_ID
+			 ,FOLLOWER_ID
+			 ,ITEM_TYPE
+			 ,FOLLOWER_TYPE
+			 ,REG_MEMBER_ID
+			 ,REGDTTM
+		FROM  ${defaultTablePrefix}FOLLOWER 
+		WHERE 1 = 1
+			AND	  ITEM_TYPE   = 'FEED'
+			AND   ITEM_ID 	  = #{feedId}
+	</select>
+	
+	<!-- FOLLWOER 등록 -->
+	<insert id="insertFollower" parameterType="org.uengine.sns.feed.vo.FollowerVo" >
+		INSERT INTO ${defaultTablePrefix}FOLLOWER 
+			(
+			 ITEM_ID,   
+			 FOLLOWER_ID,   
+			 ITEM_TYPE,  
+			 FOLLOWER_TYPE, 
+			 REG_MEMBER_ID, 
+			 REGDTTM
+			) 
+			VALUES 
+			(
+			 #{itemId}, 
+          	 #{followerId}, 
+          	 #{itemType, 		jdbcType=VARCHAR}, 
+          	 #{followerType,	jdbcType=VARCHAR}, 
+          	 #{regMemberId},  
+           	 #{regDttm}
+			)
+	</insert>
+	
+	<!-- FOLLWOER 삭제 -->
+	<delete id="deleteFollower" parameterType="org.uengine.sns.feed.vo.FollowerVo">
+		DELETE FROM ${defaultTablePrefix}FOLLOWER 
+		WHERE ITEM_ID   = #{itemId} 
+		AND   ITEM_TYPE = #{itemType}
+		<if test="followerId != null">
+        	AND FOLLOWER_ID = #{followerId}
+        	AND FOLLOWER_TYPE = #{followerType}
+        </if>     
+	</delete>
+	
+	<select id="selectGroupListForAuto" parameterType="map" resultMap="groupListForAutoResultMap">
+		SELECT 
+			 TSG.GROUP_ID AS FOLLOWER_ID,
+			 CASE WHEN TSG.GROUP_TYPE = 'ORGANIZATION' THEN TSG.GROUP_TYPE ELSE 'GROUP' END AS FOLLOWER_TYPE,
+       		 TSG.GROUP_NAME AS FOLLOWER_NAME,
+       		 TSG.GROUP_IMG_URL AS FOLLOWER_IMG_URL,
+       		 TSG.DESCRIPTION AS FOLLOWER_DESCRIPTION
+  			FROM ${defaultTablePrefix}GROUP TSG INNER JOIN ${defaultTablePrefix}GRPFWL TSGF ON TSG.GROUP_ID = TSGF.GROUP_ID
+ 			WHERE TSG.ISPUBLIC = 0  
+   		  	  AND TSGF.JOIN_STATUS = 'COMPLETE'
+	   		  AND TSG.ISDELETED = 0
+	   		  AND UPPER(TSG.GROUP_NAME) LIKE CONCAT('%' , UPPER(#{term}) , '%') escape '|'
+	   		  AND EXISTS (SELECT 1 FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY = #{userId} AND TENANT_ID = TSG.TENANT_ID AND MEMBER_ID = TSGF.MEMBER_ID)
+   		UNION ALL
+		SELECT 
+			 TSG.GROUP_ID AS FOLLOWER_ID,
+			 CASE WHEN TSG.GROUP_TYPE = 'ORGANIZATION' THEN TSG.GROUP_TYPE ELSE 'GROUP' END AS FOLLOWER_TYPE,
+       		 TSG.GROUP_NAME AS FOLLOWER_NAME,
+       		 TSG.GROUP_IMG_URL AS FOLLOWER_IMG_URL,
+       		 TSG.DESCRIPTION AS FOLLOWER_DESCRIPTION
+	  		FROM ${defaultTablePrefix}GROUP TSG
+	  		WHERE TSG.ISPUBLIC = 1
+	  		  /* AND TSG.ISHIDE   = 0 */
+	  		  AND TSG.ISDELETED = 0
+	 		  AND UPPER(TSG.GROUP_NAME) LIKE CONCAT('%' , UPPER(#{term}) , '%') escape '|'
+	</select>
+	
+	<!-- followerVo에 매핑 -->
+	<select id="selectMemberListForAuto" parameterType="map" resultMap="memberListForAutoResultMap">
+		SELECT 
+			TSM.MEMBER_ID			 AS FOLLOWER_ID,	    
+			U.USER_ID				 AS SYNC_KEY,	    	 	 
+			'MEMBER' 				 AS FOLLOWER_TYPE,
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS FOLLOWER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS FOLLOWER_NAME</otherwise>
+			</choose> ,
+			TSM.MEMBER_PIC_URL    	 AS FOLLOWER_IMG_URL,	  
+			U.EMAIL_ADDR 			 AS FOLLOWER_EMAIL, 
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS FOLLOWER_POSITION,
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS FOLLOWER_DESCRIPTION
+		FROM ${defaultTablePrefix}MEMBER TSM
+		   , ${defaultTablePrefix}USERINFO U
+		WHERE TSM.SYNC_KEY = U.USER_ID
+		  AND (TSM.MEMBER_NAME LIKE CONCAT(#{term},'%') OR TSM.MEMBER_NAME_EN LIKE CONCAT(#{term},'%'))
+      	  AND TSM.TENANT_ID = (SELECT TENANT_ID FROM ${defaultTablePrefix}MEMBER WHERE SYNC_KEY = #{userId} LIMIT 1)
+		ORDER BY TSM.MEMBER_NAME
+	</select>
+	
+	<!-- 회사 전체에서 검색시 followerVo에 매핑 -->
+	<select id="selectMemberListForAutoByAll" parameterType="map" resultMap="memberListForAutoResultMap">
+		SELECT 
+			TSM.MEMBER_ID    	 	AS FOLLOWER_ID,   
+			U.USER_ID				AS SYNC_KEY,	    
+			'MEMBER' 				AS FOLLOWER_TYPE,	  
+			<choose>
+			<when test="lang == 'en'">TSM.MEMBER_NAME_EN AS FOLLOWER_NAME</when>
+			<otherwise>TSM.MEMBER_NAME AS FOLLOWER_NAME</otherwise>
+			</choose> ,
+			TSM.MEMBER_PIC_URL    	 AS FOLLOWER_IMG_URL,	  
+			U.EMAIL_ADDR 			 AS FOLLOWER_EMAIL, 
+			<choose>
+			<when test="lang == 'en'">U.POSITION_NAME_EN</when>
+			<otherwise>U.POSITION_NAME</otherwise>
+			</choose> AS FOLLOWER_POSITION,
+			<choose>
+			<when test="lang == 'en'">U.DUTY_NAME_EN</when>
+			<otherwise>U.DUTY_NAME</otherwise>
+			</choose> AS FOLLOWER_DESCRIPTION
+		 FROM ${defaultTablePrefix}MEMBER TSM
+		    , ${defaultTablePrefix}USERINFO U 
+      	WHERE TSM.SYNC_KEY = U.USER_ID
+		  AND (TSM.MEMBER_NAME LIKE CONCAT(#{term},'%') OR TSM.MEMBER_NAME_EN LIKE CONCAT(#{term},'%'))
+      	ORDER BY TSM.MEMBER_NAME
+	</select>
+	
+	<!-- followerInfoVo에 매핑 (멤버) 툴팁 정보를 위한 쿼리-->
+	<select id="selectFollowerInfoMember" parameterType="long" resultMap="fMemberInfoResultMap">
+		SELECT 
+			 TSM.MEMBER_ID 		AS FOLLOWER_ID,   	
+			 TSM.MEMBER_NAME 	AS FOLLOWER_NAME,
+			 'MEMBER' 	 		AS FOLLOWER_TYPE,
+			 TSM.MEMBER_PIC_URL	AS FOLLOWER_PIC_URL,
+      		 TSG.GROUP_ID,
+      		 TSG.GROUP_NAME,
+      		 TSG.GROUP_IMG_URL,
+      		 TSG.DESCRIPTION
+			FROM ${defaultTablePrefix}MEMBER TSM 
+		          LEFT JOIN ${defaultTablePrefix}GRPFWL TSGR ON TSGR.MEMBER_ID = TSM.MEMBER_ID
+		          LEFT JOIN ${defaultTablePrefix}GROUP TSG ON TSG.GROUP_ID = TSGR.GROUP_ID 
+    		WHERE TSM.MEMBER_ID=#{followerId}
+	</select>
+	
+	<!-- followerInfoVo에 매핑 (그룹) 툴팁 정보를 위한 쿼리 -->
+	<select id="selectFollowerInfoGroup" parameterType="long" resultMap="fGroupInfoResultMap">
+		SELECT 
+			TSG.GROUP_ID 	  	 AS FOLLOWER_ID,   	
+			TSG.GROUP_NAME 	  	 AS FOLLOWER_NAME,
+			'GROUP' 	 		 AS FOLLOWER_TYPE,
+      		TSG.GROUP_IMG_URL 	 AS FOLLOWER_PIC_URL,
+		    TSG.DESCRIPTION   	 AS DESCRIPTION,
+		    TSM.MEMBER_ID		 AS MEMBER_ID,   	
+			TSM.MEMBER_NAME		 AS MEMBER_NAME,
+			TSM.MEMBER_PIC_URL	 AS MEMBER_PIC_URL,
+			TSM.MEMBER_THUMB_URL AS MEMBER_THUMB_URL
+		  FROM ${defaultTablePrefix}GROUP TSG, ${defaultTablePrefix}GRPFWL TSGR, ${defaultTablePrefix}MEMBER TSM
+		 WHERE TSG.GROUP_ID = TSGR.GROUP_ID
+		   AND TSGR.MEMBER_ID = TSM.MEMBER_ID
+		   AND TSGR.JOIN_STATUS = 'COMPLETE'
+		   AND TSG.GROUP_ID = #{followerId}
+	</select>
+
+</mapper>
